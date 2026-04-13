@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fitness CRM Dashboard</title>
+</head>
+<body>
+
+<h1>Client Dashboard</h1>
+
+<button onclick="loadClients()">Load Clients</button>
+
+<table border="1" id="table">
+    <tr>
+        <th>Name</th>
+        <th>Goal</th>
+        <th>Streak</th>
+        <th>Status</th>
+    </tr>
+</table>
+
+<script>
+async function loadClients() {
+    const res = await fetch("http://127.0.0.1:8000/dashboard");
+    const data = await res.json();
+
+    const table = document.getElementById("table");
+
+    data.forEach(client => {
+        const row = table.insertRow();
+
+        row.insertCell(0).innerText = client.name;
+        row.insertCell(1).innerText = client.goal;
+        row.insertCell(2).innerText = client.streak;
+        row.insertCell(3).innerText = client.status;
+    });
+}
+</script>
+
+</body>
+</html>
