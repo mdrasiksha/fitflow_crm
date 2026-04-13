@@ -1,40 +1,377 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Fitness CRM Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitFlow CRM Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --border: #e5e7eb;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 25%);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.05s ease, background 0.2s ease;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-yes {
+      background: rgba(22, 163, 74, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(22, 163, 74, 0.28);
+    }
+
+    .btn-no {
+      background: rgba(220, 38, 38, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(220, 38, 38, 0.28);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.86rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .status-active {
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .status-at-risk {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+      align-items: end;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.84rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 3px #dbeafe;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+
+    @media (max-width: 860px) {
+      form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
+  <main class="container">
+    <section class="header">
+      <div>
+        <h1>FitFlow Client Dashboard</h1>
+        <div class="subtitle">Track clients, update check-ins, and add new members.</div>
+      </div>
+      <button class="btn-primary" id="refreshBtn">Refresh</button>
+    </section>
 
-<h1>Client Dashboard</h1>
+    <section class="card">
+      <div class="toolbar">
+        <h2 style="margin:0;font-size:1.1rem;">Clients</h2>
+        <span class="note" id="tableMessage"></span>
+      </div>
 
-<button onclick="loadClients()">Load Clients</button>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Goal</th>
+              <th>Streak</th>
+              <th>Status</th>
+              <th>Check-In</th>
+            </tr>
+          </thead>
+          <tbody id="clientRows"></tbody>
+        </table>
+      </div>
+    </section>
 
-<table border="1" id="table">
-    <tr>
-        <th>Name</th>
-        <th>Goal</th>
-        <th>Streak</th>
-        <th>Status</th>
-    </tr>
-</table>
+    <section class="card">
+      <h2 style="margin-top:0;font-size:1.1rem;">Add Client</h2>
+      <form id="addClientForm">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" name="name" required placeholder="Alex Carter" />
+        </div>
 
-<script>
-async function loadClients() {
-    const res = await fetch("http://127.0.0.1:8000/dashboard");
-    const data = await res.json();
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" required placeholder="(555) 123-4567" />
+        </div>
 
-    const table = document.getElementById("table");
+        <div class="field">
+          <label for="goal">Goal</label>
+          <input id="goal" name="goal" required placeholder="Lose 10 lbs" />
+        </div>
 
-    data.forEach(client => {
-        const row = table.insertRow();
+        <button class="btn-primary" type="submit">Add Client</button>
+      </form>
+      <div class="note" id="formMessage"></div>
+    </section>
+  </main>
 
-        row.insertCell(0).innerText = client.name;
-        row.insertCell(1).innerText = client.goal;
-        row.insertCell(2).innerText = client.streak;
-        row.insertCell(3).innerText = client.status;
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+
+    const clientRows = document.getElementById("clientRows");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const tableMessage = document.getElementById("tableMessage");
+    const formMessage = document.getElementById("formMessage");
+    const addClientForm = document.getElementById("addClientForm");
+
+    function statusBadge(status) {
+      const normalized = status === "at_risk" ? "at-risk" : "active";
+      const className = status === "at_risk" ? "status-at-risk" : "status-active";
+      return `<span class="badge ${className}">${normalized}</span>`;
+    }
+
+    function rowTemplate(client) {
+      return `
+        <tr>
+          <td>${client.name}</td>
+          <td>${client.goal}</td>
+          <td>${client.streak}</td>
+          <td>${statusBadge(client.status)}</td>
+          <td>
+            <div class="actions">
+              <button class="btn-yes" data-id="${client.id}" data-status="yes">YES</button>
+              <button class="btn-no" data-id="${client.id}" data-status="no">NO</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    async function loadClients() {
+      tableMessage.textContent = "Loading...";
+      try {
+        const res = await fetch(`${API_BASE}/dashboard`);
+        if (!res.ok) throw new Error("Could not load dashboard");
+
+        const data = await res.json();
+        clientRows.innerHTML = data.map(rowTemplate).join("");
+        tableMessage.textContent = `${data.length} client(s)`;
+      } catch (error) {
+        console.error(error);
+        tableMessage.textContent = "Failed to load clients";
+      }
+    }
+
+    async function submitCheckin(clientId, status) {
+      try {
+        const res = await fetch(`${API_BASE}/checkin`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client_id: Number(clientId), status })
+        });
+
+        if (!res.ok) throw new Error("Check-in failed");
+        tableMessage.textContent = `Saved ${status.toUpperCase()} check-in.`;
+        await loadClients();
+      } catch (error) {
+        console.error(error);
+        tableMessage.textContent = "Could not save check-in";
+      }
+    }
+
+    async function addClient(event) {
+      event.preventDefault();
+      formMessage.textContent = "Saving...";
+
+      const formData = new FormData(addClientForm);
+      const payload = {
+        name: formData.get("name")?.toString().trim(),
+        phone: formData.get("phone")?.toString().trim(),
+        goal: formData.get("goal")?.toString().trim()
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/clients`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error("Create client failed");
+
+        addClientForm.reset();
+        formMessage.textContent = "Client added.";
+        await loadClients();
+      } catch (error) {
+        console.error(error);
+        formMessage.textContent = "Could not add client";
+      }
+    }
+
+    clientRows.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+
+      const clientId = target.dataset.id;
+      const status = target.dataset.status;
+      if (!clientId || !status) return;
+
+      submitCheckin(clientId, status);
     });
-}
-</script>
 
+    refreshBtn.addEventListener("click", loadClients);
+    addClientForm.addEventListener("submit", addClient);
+
+    loadClients();
+  </script>
 </body>
 </html>
