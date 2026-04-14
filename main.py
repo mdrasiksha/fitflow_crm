@@ -99,6 +99,11 @@ class ProgressCreate(BaseModel):
     weight: float
 
 
+class UserAuthPayload(BaseModel):
+    email: str
+    password: str
+
+
 # ======================
 # Business Logic
 # ======================
@@ -201,6 +206,39 @@ def update_client_notes(client_id: int, payload: ClientNotesUpdate, db: Session 
         "message": "Notes saved",
         "data": {"client_id": client_id, "notes": client.notes},
     }
+
+
+# ======================
+# Auth APIs
+# ======================
+@app.post("/register")
+def register_user(payload: UserAuthPayload, db: Session = Depends(get_db)):
+    existing_user = db.query(models.User).filter(models.User.email == payload.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    user = models.User(email=payload.email, password=payload.password)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "message": "User registered",
+        "user_id": user.id,
+    }
+
+
+@app.post("/login")
+def login_user(payload: UserAuthPayload, db: Session = Depends(get_db)):
+    user = (
+        db.query(models.User)
+        .filter(models.User.email == payload.email, models.User.password == payload.password)
+        .first()
+    )
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    return {"user_id": user.id}
 
 
 # ======================
