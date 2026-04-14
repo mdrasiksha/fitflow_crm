@@ -266,6 +266,7 @@
 
   <script>
     const API_BASE = "http://127.0.0.1:8000";
+    const EMPTY_ROW = `<tr><td colspan="5" style="color: var(--muted);">No clients yet. Add your first client above.</td></tr>`;
 
     const clientRows = document.getElementById("clientRows");
     const refreshBtn = document.getElementById("refreshBtn");
@@ -302,7 +303,15 @@
         const res = await fetch(`${API_BASE}/dashboard`);
         if (!res.ok) throw new Error("Could not load dashboard");
 
-        const data = await res.json();
+        const payload = await res.json();
+        const data = payload.data || [];
+
+        if (data.length === 0) {
+          clientRows.innerHTML = EMPTY_ROW;
+          tableMessage.textContent = "No clients found";
+          return;
+        }
+
         clientRows.innerHTML = data.map(rowTemplate).join("");
         tableMessage.textContent = `${data.length} client(s)`;
       } catch (error) {
@@ -319,8 +328,9 @@
           body: JSON.stringify({ client_id: Number(clientId), status })
         });
 
-        if (!res.ok) throw new Error("Check-in failed");
-        tableMessage.textContent = `Saved ${status.toUpperCase()} check-in.`;
+        const payload = await res.json();
+        if (!res.ok || !payload.success) throw new Error("Check-in failed");
+        tableMessage.textContent = `Success: ${payload.message}`;
         await loadClients();
       } catch (error) {
         console.error(error);
@@ -346,10 +356,11 @@
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) throw new Error("Create client failed");
+        const payload = await res.json();
+        if (!res.ok || !payload.success) throw new Error("Create client failed");
 
         addClientForm.reset();
-        formMessage.textContent = "Client added.";
+        formMessage.textContent = `Success: ${payload.message}`;
         await loadClients();
       } catch (error) {
         console.error(error);
