@@ -1,11 +1,11 @@
 from datetime import date
 from typing import Generator, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
 import models
@@ -64,13 +64,13 @@ def get_db() -> Generator[Session, None, None]:
 # Pydantic Models
 # ======================
 class ClientCreate(BaseModel):
-    name: str = Field(min_length=2, max_length=100)
-    phone: str = Field(min_length=7, max_length=30)
-    goal: str = Field(min_length=2, max_length=200)
+    name: str
+    phone: str
+    goal: str
 
 
 class CheckinCreate(BaseModel):
-    client_id: int = Field(gt=0)
+    client_id: int
     status: Literal["yes", "no"]
 
 
@@ -110,12 +110,12 @@ def dashboard_row(client: models.Client) -> dict:
 # ======================
 # Client APIs
 # ======================
-@app.post("/clients", status_code=status.HTTP_201_CREATED)
+@app.post("/clients")
 def create_client(client: ClientCreate, db: Session = Depends(get_db)):
     new_client = models.Client(
-        name=client.name.strip(),
-        phone=client.phone.strip(),
-        goal=client.goal.strip(),
+        name=client.name,
+        phone=client.phone,
+        goal=client.goal,
         start_date=date.today(),
         status="active",
     )
@@ -125,15 +125,8 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db)):
     db.refresh(new_client)
 
     return {
-        "success": True,
-        "message": "Client added successfully",
-        "data": {
-            "id": new_client.id,
-            "name": new_client.name,
-            "phone": new_client.phone,
-            "goal": new_client.goal,
-            "status": new_client.status,
-        },
+        "message": "Client added",
+        "client_id": new_client.id,
     }
 
 
