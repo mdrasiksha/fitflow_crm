@@ -295,3 +295,10 @@ def get_progress(client_id: int, db: Session = Depends(get_db)):
         {"date": p.date.isoformat(), "weight": p.weight}
         for p in progress_entries
     ]
+
+
+from fastapi.responses import FileResponse
+
+@app.get("/")
+def serve_home():
+    return FileResponse("static/index.html")
