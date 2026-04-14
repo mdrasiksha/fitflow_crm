@@ -3,19 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FitFlow CRM Dashboard</title>
+  <title>FitFlow Dashboard</title>
   <style>
     :root {
-      --bg: #f4f7fb;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
+      --bg: #f3f7ff;
+      --surface: #ffffff;
+      --surface-soft: #f8fbff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
       --primary: #2563eb;
       --primary-dark: #1d4ed8;
       --success: #16a34a;
       --danger: #dc2626;
-      --border: #e5e7eb;
-      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --success-soft: #dcfce7;
+      --danger-soft: #fee2e2;
+      --radius: 16px;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 12px 34px rgba(37, 99, 235, 0.12);
     }
 
     * {
@@ -24,138 +29,185 @@
 
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       color: var(--text);
-      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 25%);
-      min-height: 100vh;
-      padding: 24px;
+      background: linear-gradient(180deg, #ebf2ff 0%, var(--bg) 34%);
+      padding: 28px 18px;
     }
 
     .container {
-      max-width: 1040px;
+      width: min(1100px, 100%);
       margin: 0 auto;
       display: grid;
       gap: 20px;
     }
 
     .header {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: var(--shadow);
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 45%, #3b82f6 100%);
+      color: #fff;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: var(--shadow-md);
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      gap: 14px;
       flex-wrap: wrap;
-      gap: 12px;
     }
 
     .header h1 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      letter-spacing: -0.01em;
     }
 
     .subtitle {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 0.95rem;
+      margin: 8px 0 0;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 0.98rem;
     }
 
     .card {
-      background: var(--card);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
       padding: 20px;
     }
 
-    .toolbar {
+    .section-head {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      justify-content: space-between;
       gap: 12px;
+      margin-bottom: 12px;
       flex-wrap: wrap;
     }
 
-    button {
-      border: none;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.05s ease, background 0.2s ease;
+    h2 {
+      margin: 0;
+      font-size: 1.08rem;
     }
 
-    button:active {
-      transform: scale(0.98);
+    .subtle {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+      transition-property: background-color, box-shadow, transform, opacity;
+      box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
     }
 
     .btn-primary {
-      background: var(--primary);
-      color: white;
+      background: #fff;
+      color: var(--primary);
     }
 
     .btn-primary:hover {
+      background: #eff6ff;
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-submit:hover {
       background: var(--primary-dark);
     }
 
     .btn-yes {
-      background: rgba(22, 163, 74, 0.12);
-      color: var(--success);
-      border: 1px solid rgba(22, 163, 74, 0.28);
+      background: var(--success-soft);
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+
+    .btn-yes:hover {
+      background: #bbf7d0;
     }
 
     .btn-no {
-      background: rgba(220, 38, 38, 0.12);
-      color: var(--danger);
-      border: 1px solid rgba(220, 38, 38, 0.28);
+      background: var(--danger-soft);
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .btn-no:hover {
+      background: #fecaca;
     }
 
     .table-wrap {
       overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-soft);
     }
 
     table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       min-width: 720px;
     }
 
     th,
     td {
+      padding: 14px;
       text-align: left;
-      padding: 12px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
+      background: #fff;
     }
 
     th {
-      color: var(--muted);
-      font-size: 0.86rem;
-      letter-spacing: 0.04em;
+      font-size: 0.78rem;
       text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
       font-weight: 700;
+      background: var(--surface-soft);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover td {
+      background: #f8faff;
     }
 
     .badge {
-      display: inline-block;
       border-radius: 999px;
       padding: 4px 10px;
       font-size: 0.78rem;
       font-weight: 700;
-      text-transform: capitalize;
+      text-transform: lowercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .status-active {
+    .badge-active {
       color: #166534;
-      background: #dcfce7;
+      background: var(--success-soft);
     }
 
-    .status-at-risk {
+    .badge-risk {
       color: #991b1b;
-      background: #fee2e2;
+      background: var(--danger-soft);
     }
 
     .actions {
@@ -163,10 +215,17 @@
       gap: 8px;
     }
 
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 26px 12px;
+      font-weight: 500;
+    }
+
     form {
       display: grid;
-      gap: 12px;
       grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+      gap: 12px;
       align-items: end;
     }
 
@@ -176,34 +235,90 @@
     }
 
     label {
-      font-size: 0.84rem;
+      font-size: 0.83rem;
       color: var(--muted);
       font-weight: 600;
     }
 
     input {
-      padding: 10px 12px;
+      width: 100%;
+      padding: 11px 12px;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 11px;
       font-size: 0.95rem;
+      color: var(--text);
       outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: #fff;
+    }
+
+    input::placeholder {
+      color: #94a3b8;
     }
 
     input:focus {
       border-color: #93c5fd;
-      box-shadow: 0 0 0 3px #dbeafe;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
     }
 
-    .note {
-      color: var(--muted);
-      font-size: 0.88rem;
-      margin-top: 8px;
+    .inline-feedback {
+      margin-top: 10px;
+      font-size: 0.9rem;
       min-height: 20px;
     }
 
-    @media (max-width: 860px) {
+    .inline-feedback.success {
+      color: #166534;
+    }
+
+    .inline-feedback.error {
+      color: #b91c1c;
+    }
+
+    .toast {
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      background: #0f172a;
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      max-width: 320px;
+      font-size: 0.9rem;
+      z-index: 100;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background: #14532d;
+    }
+
+    .toast.error {
+      background: #7f1d1d;
+    }
+
+    @media (max-width: 900px) {
       form {
         grid-template-columns: 1fr;
+      }
+
+      .header {
+        padding: 22px;
+      }
+
+      .toast {
+        left: 18px;
+        right: 18px;
+        max-width: none;
       }
     }
   </style>
@@ -212,16 +327,16 @@
   <main class="container">
     <section class="header">
       <div>
-        <h1>FitFlow Client Dashboard</h1>
-        <div class="subtitle">Track clients, update check-ins, and add new members.</div>
+        <h1>FitFlow Dashboard</h1>
+        <p class="subtitle">Track clients and prevent drop-offs</p>
       </div>
-      <button class="btn-primary" id="refreshBtn">Refresh</button>
+      <button class="btn btn-primary" id="refreshBtn" type="button">Refresh</button>
     </section>
 
     <section class="card">
-      <div class="toolbar">
-        <h2 style="margin:0;font-size:1.1rem;">Clients</h2>
-        <span class="note" id="tableMessage"></span>
+      <div class="section-head">
+        <h2>Clients</h2>
+        <span class="subtle" id="tableMessage" aria-live="polite"></span>
       </div>
 
       <div class="table-wrap">
@@ -232,7 +347,7 @@
               <th>Goal</th>
               <th>Streak</th>
               <th>Status</th>
-              <th>Check-In</th>
+              <th>Check-in</th>
             </tr>
           </thead>
           <tbody id="clientRows"></tbody>
@@ -241,43 +356,69 @@
     </section>
 
     <section class="card">
-      <h2 style="margin-top:0;font-size:1.1rem;">Add Client</h2>
+      <div class="section-head" style="margin-bottom:16px;">
+        <h2>Add Client</h2>
+      </div>
+
       <form id="addClientForm">
         <div class="field">
           <label for="name">Name</label>
-          <input id="name" name="name" required placeholder="Alex Carter" />
+          <input id="name" name="name" placeholder="Alex Carter" required />
         </div>
 
         <div class="field">
           <label for="phone">Phone</label>
-          <input id="phone" name="phone" required placeholder="(555) 123-4567" />
+          <input id="phone" name="phone" placeholder="(555) 123-4567" required />
         </div>
 
         <div class="field">
           <label for="goal">Goal</label>
-          <input id="goal" name="goal" required placeholder="Lose 10 lbs" />
+          <input id="goal" name="goal" placeholder="Lose 10 lbs" required />
         </div>
 
-        <button class="btn-primary" type="submit">Add Client</button>
+        <button class="btn btn-submit" type="submit">Add Client</button>
       </form>
-      <div class="note" id="formMessage"></div>
+      <div class="inline-feedback" id="formMessage" aria-live="polite"></div>
     </section>
   </main>
 
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
   <script>
     const API = "http://127.0.0.1:8000";
-    const EMPTY_ROW = `<tr><td colspan="5" style="color: var(--muted);">No clients yet. Add your first client above.</td></tr>`;
 
     const clientRows = document.getElementById("clientRows");
     const refreshBtn = document.getElementById("refreshBtn");
     const tableMessage = document.getElementById("tableMessage");
     const formMessage = document.getElementById("formMessage");
     const addClientForm = document.getElementById("addClientForm");
+    const toast = document.getElementById("toast");
+
+    let toastTimeout;
+
+    function showToast(message, type = "success") {
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.className = "toast";
+      }, 2800);
+    }
+
+    function setFormFeedback(message, type = "success") {
+      formMessage.textContent = message;
+      formMessage.className = `inline-feedback ${type}`;
+    }
 
     function statusBadge(status) {
-      const normalized = status === "at_risk" ? "at-risk" : "active";
-      const className = status === "at_risk" ? "status-at-risk" : "status-active";
-      return `<span class="badge ${className}">${normalized}</span>`;
+      if (status === "at_risk") {
+        return '<span class="badge badge-risk">at_risk</span>';
+      }
+      return '<span class="badge badge-active">active</span>';
+    }
+
+    function emptyStateRow() {
+      return '<tr><td colspan="5" class="empty-state">No clients yet</td></tr>';
     }
 
     function rowTemplate(client) {
@@ -289,62 +430,73 @@
           <td>${statusBadge(client.status)}</td>
           <td>
             <div class="actions">
-              <button class="btn-yes" data-id="${client.id}" data-status="yes">YES</button>
-              <button class="btn-no" data-id="${client.id}" data-status="no">NO</button>
+              <button class="btn btn-yes" data-id="${client.id}" data-status="yes" type="button">YES</button>
+              <button class="btn btn-no" data-id="${client.id}" data-status="no" type="button">NO</button>
             </div>
           </td>
         </tr>
       `;
     }
 
-    async function loadClients() {
-      tableMessage.textContent = "Loading...";
+    async function parseJsonResponse(response, fallbackMessage) {
+      let payload = {};
       try {
-        const res = await fetch(API + "/dashboard");
-        let payload = {};
-        try {
-          payload = await res.json();
-        } catch {
-          throw new Error("Dashboard response was not valid JSON");
-        }
-        console.log("GET /dashboard response:", payload);
-        if (!res.ok || !payload.success) throw new Error(payload.message || "Could not load dashboard");
-        const data = payload.data || [];
+        payload = await response.json();
+      } catch {
+        throw new Error(fallbackMessage);
+      }
+      return payload;
+    }
 
-        if (data.length === 0) {
-          clientRows.innerHTML = EMPTY_ROW;
-          tableMessage.textContent = "No clients found";
+    async function loadClients() {
+      tableMessage.textContent = "Loading clients...";
+      try {
+        const response = await fetch(`${API}/dashboard`);
+        const payload = await parseJsonResponse(response, "Dashboard response was not valid JSON");
+
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || "Could not load dashboard");
+        }
+
+        const clients = payload.data || [];
+
+        if (clients.length === 0) {
+          clientRows.innerHTML = emptyStateRow();
+          tableMessage.textContent = "No clients yet";
           return;
         }
 
-        clientRows.innerHTML = data.map(rowTemplate).join("");
-        tableMessage.textContent = `${data.length} client(s)`;
+        clientRows.innerHTML = clients.map(rowTemplate).join("");
+        tableMessage.textContent = `${clients.length} client(s)`;
       } catch (error) {
         console.error("loadClients failed:", error);
+        clientRows.innerHTML = emptyStateRow();
         tableMessage.textContent = "Failed to load clients";
+        showToast("Failed to load clients", "error");
       }
     }
 
     async function submitCheckin(clientId, status) {
       try {
-        const res = await fetch(API + "/checkin", {
+        const response = await fetch(`${API}/checkin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ client_id: Number(clientId), status })
         });
-        let payload = {};
-        try {
-          payload = await res.json();
-        } catch {
-          throw new Error("Check-in response was not valid JSON");
+
+        const payload = await parseJsonResponse(response, "Check-in response was not valid JSON");
+
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || "Check-in failed");
         }
-        console.log("POST /checkin response:", payload);
-        if (!res.ok || !payload.success) throw new Error(payload.message || "Check-in failed");
-        tableMessage.textContent = `Success: ${payload.message}`;
+
+        tableMessage.textContent = payload.message || "Check-in saved";
+        showToast(payload.message || "Check-in saved", "success");
         await loadClients();
       } catch (error) {
         console.error("submitCheckin failed:", error);
         tableMessage.textContent = "Could not save check-in";
+        showToast("Could not save check-in", "error");
       }
     }
 
@@ -356,42 +508,34 @@
       const goal = document.getElementById("goal").value.trim();
 
       if (!name || !phone || !goal) {
-        alert("Please fill in name, phone, and goal.");
+        setFormFeedback("Please fill in name, phone, and goal.", "error");
+        showToast("Please fill in all fields", "error");
         return;
       }
 
-      console.log("Sending:", { name, phone, goal });
-
       try {
-        const res = await fetch(API + "/clients", {
+        const response = await fetch(`${API}/clients`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({
-            name: name,
-            phone: phone,
-            goal: goal
-          })
+          body: JSON.stringify({ name, phone, goal })
         });
 
-        const data = await res.json();
-        console.log("Response:", data);
+        const payload = await parseJsonResponse(response, "Client response was not valid JSON");
 
-        if (!res.ok) {
-          alert("Error: " + JSON.stringify(data));
-          formMessage.textContent = "Could not add client";
-          return;
+        if (!response.ok) {
+          throw new Error(payload.message || "Could not add client");
         }
 
-        alert("Client added successfully");
         addClientForm.reset();
-        formMessage.textContent = "Client added successfully";
-        loadClients();
-      } catch (err) {
-        console.error(err);
-        formMessage.textContent = "Could not add client";
-        alert("Could not add client");
+        setFormFeedback("Client added successfully.", "success");
+        showToast("Client added successfully", "success");
+        await loadClients();
+      } catch (error) {
+        console.error("addClient failed:", error);
+        setFormFeedback("Could not add client. Please try again.", "error");
+        showToast("Could not add client", "error");
       }
     }
 
