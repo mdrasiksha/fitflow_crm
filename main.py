@@ -278,12 +278,10 @@ def get_progress(client_id: int, db: Session = Depends(get_db)):
     progress_entries = (
         db.query(models.Progress)
         .filter(models.Progress.client_id == client_id)
-        .order_by(models.Progress.date.desc(), models.Progress.id.desc())
+        .order_by(models.Progress.date.asc(), models.Progress.id.asc())
         .all()
     )
-    data = [
-        {"id": p.id, "client_id": p.client_id, "weight": p.weight, "date": p.date.isoformat()}
+    return [
+        {"date": p.date.isoformat(), "weight": p.weight}
         for p in progress_entries
     ]
-
-    return {"success": True, "data": data, "count": len(data)}
