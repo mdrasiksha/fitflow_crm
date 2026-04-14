@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, ForeignKey, Integer, String
+from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from database import Base
@@ -11,11 +11,13 @@ class Client(Base):
     name = Column(String, nullable=False)
     phone = Column(String, nullable=False)
     goal = Column(String, nullable=False)
+    notes = Column(String, nullable=True)
     start_date = Column(Date)
     status = Column(String, default="active")  # active / at_risk
 
     checkins = relationship("Checkin", back_populates="client", cascade="all, delete-orphan")
     payments = relationship("Payment", back_populates="client", cascade="all, delete-orphan")
+    progress_entries = relationship("Progress", back_populates="client", cascade="all, delete-orphan")
 
 
 class Checkin(Base):
@@ -39,3 +41,14 @@ class Payment(Base):
     due_date = Column(Date)
 
     client = relationship("Client", back_populates="payments")
+
+
+class Progress(Base):
+    __tablename__ = "progress"
+
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
+    weight = Column(Float, nullable=False)
+    date = Column(Date, nullable=False)
+
+    client = relationship("Client", back_populates="progress_entries")

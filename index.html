@@ -367,6 +367,8 @@
             <tr>
               <th>Name</th>
               <th>Goal</th>
+              <th>Notes</th>
+              <th>Weight</th>
               <th>Streak</th>
               <th>Status</th>
               <th>Actions</th>
@@ -440,7 +442,7 @@
     }
 
     function emptyStateRow() {
-      return '<tr><td colspan="5" class="empty-state">No clients yet</td></tr>';
+      return '<tr><td colspan="7" class="empty-state">No clients yet</td></tr>';
     }
 
     function riskNote(client) {
@@ -448,11 +450,36 @@
       return `<div class="risk-note">⚠️ Inactive for ${client.inactive_days} day(s)</div>`;
     }
 
+    function escapeHtml(value = "") {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
     function rowTemplate(client) {
+      const latestWeight = client.latest_weight == null ? "—" : `${client.latest_weight} kg`;
+      const previousWeight = client.previous_weight == null ? "" : `<div class="subtle">Prev: ${client.previous_weight} kg</div>`;
+      const safeName = escapeHtml(client.name || "");
+      const safeGoal = escapeHtml(client.goal || "");
+      const safeNotes = escapeHtml(client.notes || "");
+
       return `
         <tr class="${client.status === "at_risk" ? "at-risk-row" : ""}">
-          <td>${client.name}</td>
-          <td>${client.goal}</td>
+          <td>${safeName}</td>
+          <td>${safeGoal}</td>
+          <td>
+            <input type="text" id="note-${client.id}" placeholder="Add notes" value="${safeNotes}" />
+            <button class="btn btn-submit" data-id="${client.id}" data-action="save-notes" type="button" style="margin-top:8px;">Save Notes</button>
+          </td>
+          <td>
+            <div>${latestWeight}</div>
+            ${previousWeight}
+            <input type="number" step="0.1" id="weight-${client.id}" placeholder="Enter weight" style="margin-top:8px;" />
+            <button class="btn btn-submit" data-id="${client.id}" data-action="update-weight" type="button" style="margin-top:8px;">Update Weight</button>
+          </td>
           <td>${client.streak}</td>
           <td>
             ${statusBadge(client.status)}
@@ -531,6 +558,61 @@
       }
     }
 
+    async function saveNotes(clientId) {
+      const notesInput = document.getElementById(`note-${clientId}`);
+      if (!notesInput) return;
+
+      try {
+        const response = await fetch(`${API}/clients/${clientId}/notes`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notes: notesInput.value.trim() })
+        });
+
+        const payload = await parseJsonResponse(response, "Notes response was not valid JSON");
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || "Could not save notes");
+        }
+
+        showToast("Notes saved", "success");
+        tableMessage.textContent = "Notes saved";
+      } catch (error) {
+        console.error("saveNotes failed:", error);
+        showToast("Could not save notes", "error");
+      }
+    }
+
+    async function updateWeight(clientId) {
+      const weightInput = document.getElementById(`weight-${clientId}`);
+      if (!weightInput) return;
+
+      const weight = Number(weightInput.value);
+      if (!weightInput.value || Number.isNaN(weight)) {
+        showToast("Enter a valid weight", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API}/progress`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client_id: Number(clientId), weight })
+        });
+
+        const payload = await parseJsonResponse(response, "Progress response was not valid JSON");
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || "Could not update weight");
+        }
+
+        showToast("Weight updated", "success");
+        tableMessage.textContent = "Weight updated";
+        await loadClients();
+      } catch (error) {
+        console.error("updateWeight failed:", error);
+        showToast("Could not update weight", "error");
+      }
+    }
+
     async function addClient(event) {
       event.preventDefault();
 
@@ -576,6 +658,14 @@
 
       const clientId = target.dataset.id;
       const action = target.dataset.action;
+      if (action === "save-notes" && clientId) {
+        saveNotes(clientId);
+        return;
+      }
+      if (action === "update-weight" && clientId) {
+        updateWeight(clientId);
+        return;
+      }
       if (action === "reminder") {
         alert("Reminder sent to client");
         return;
