@@ -203,6 +203,10 @@
       background: #fef2f2;
     }
 
+    tbody tr.at-risk-row:hover td {
+      background: #fee2e2;
+    }
+
     .badge {
       border-radius: 999px;
       padding: 4px 10px;
@@ -449,7 +453,7 @@
 
     function riskNote(client) {
       if (client.status !== "at_risk") return "";
-      return `<div class="risk-note">⚠️ Inactive for ${client.inactive_days} day(s)</div>`;
+      return `<div class="risk-note">⚠️ Inactive for ${client.inactive_days} days</div>`;
     }
 
     function escapeHtml(value = "") {

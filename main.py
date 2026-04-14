@@ -102,8 +102,8 @@ class ProgressCreate(BaseModel):
 # ======================
 # Business Logic
 # ======================
-def is_at_risk(client: models.Client) -> bool:
-    return calculate_inactive_days(client) >= 2
+def is_at_risk(inactive_days: int) -> bool:
+    return inactive_days >= 2
 
 
 def calculate_inactive_days(client: models.Client) -> int:
@@ -118,7 +118,7 @@ def calculate_inactive_days(client: models.Client) -> int:
 
 def dashboard_row(client: models.Client) -> dict:
     inactive_days = calculate_inactive_days(client)
-    at_risk = is_at_risk(client)
+    at_risk = is_at_risk(inactive_days)
     sorted_progress = sorted(client.progress_entries, key=lambda p: (p.date, p.id), reverse=True)
     latest_weight = sorted_progress[0].weight if sorted_progress else None
     previous_weight = sorted_progress[1].weight if len(sorted_progress) > 1 else None
