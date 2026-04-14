@@ -88,15 +88,21 @@ def calculate_streak(client: models.Client) -> int:
 
 
 def is_at_risk(client: models.Client) -> bool:
-    last_two = sorted(client.checkins, key=lambda c: c.date, reverse=True)[:2]
-    if len(last_two) < 2:
-        return False
+    return calculate_inactive_days(client) >= 2
 
-    missed_days = sum(1 for checkin in last_two if checkin.status != "yes")
-    return missed_days >= 2
+
+def calculate_inactive_days(client: models.Client) -> int:
+    checkins = sorted(client.checkins, key=lambda c: c.date, reverse=True)
+    if checkins:
+        last_checkin_date = checkins[0].date
+    else:
+        last_checkin_date = client.start_date or date.today()
+
+    return max((date.today() - last_checkin_date).days, 0)
 
 
 def dashboard_row(client: models.Client) -> dict:
+    inactive_days = calculate_inactive_days(client)
     at_risk = is_at_risk(client)
     return {
         "id": client.id,
@@ -104,6 +110,7 @@ def dashboard_row(client: models.Client) -> dict:
         "goal": client.goal,
         "streak": calculate_streak(client),
         "status": "at_risk" if at_risk else "active",
+        "inactive_days": inactive_days,
     }
 
 
