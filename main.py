@@ -64,9 +64,9 @@ def get_db() -> Generator[Session, None, None]:
 # Pydantic Models
 # ======================
 class ClientCreate(BaseModel):
-    name: str
-    phone: str
-    goal: str
+    name: str = Field(min_length=2, max_length=100)
+    phone: str = Field(min_length=7, max_length=30)
+    goal: str = Field(min_length=2, max_length=200)
 
 
 class CheckinCreate(BaseModel):
@@ -124,7 +124,17 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_client)
 
-    return {"message": "Client added", "client_id": new_client.id}
+    return {
+        "success": True,
+        "message": "Client added successfully",
+        "data": {
+            "id": new_client.id,
+            "name": new_client.name,
+            "phone": new_client.phone,
+            "goal": new_client.goal,
+            "status": new_client.status,
+        },
+    }
 
 
 @app.get("/clients")
