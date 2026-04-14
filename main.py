@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 
 import models
 from database import Base, SessionLocal, engine
+from streaks import calculate_streak
 
 app = FastAPI(title="FitFlow CRM API", version="1.0.0")
 
@@ -77,16 +78,6 @@ class CheckinCreate(BaseModel):
 # ======================
 # Business Logic
 # ======================
-def calculate_streak(client: models.Client) -> int:
-    streak = 0
-    for checkin in sorted(client.checkins, key=lambda c: c.date, reverse=True):
-        if checkin.status == "yes":
-            streak += 1
-        else:
-            break
-    return streak
-
-
 def is_at_risk(client: models.Client) -> bool:
     return calculate_inactive_days(client) >= 2
 
