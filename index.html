@@ -350,36 +350,48 @@
 
     async function addClient(event) {
       event.preventDefault();
-      formMessage.textContent = "Saving...";
 
-      const formData = new FormData(addClientForm);
-      const payload = {
-        name: formData.get("name")?.toString().trim(),
-        phone: formData.get("phone")?.toString().trim(),
-        goal: formData.get("goal")?.toString().trim()
-      };
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const goal = document.getElementById("goal").value.trim();
+
+      if (!name || !phone || !goal) {
+        alert("Please fill in name, phone, and goal.");
+        return;
+      }
+
+      console.log("Sending:", { name, phone, goal });
 
       try {
         const res = await fetch(API + "/clients", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: name,
+            phone: phone,
+            goal: goal
+          })
         });
-        let payload = {};
-        try {
-          payload = await res.json();
-        } catch {
-          throw new Error("Create-client response was not valid JSON");
-        }
-        console.log("POST /clients response:", payload);
-        if (!res.ok || !payload.success) throw new Error(payload.message || "Create client failed");
 
+        const data = await res.json();
+        console.log("Response:", data);
+
+        if (!res.ok) {
+          alert("Error: " + JSON.stringify(data));
+          formMessage.textContent = "Could not add client";
+          return;
+        }
+
+        alert("Client added successfully");
         addClientForm.reset();
-        formMessage.textContent = `Success: ${payload.message}`;
-        await loadClients();
-      } catch (error) {
-        console.error("addClient failed:", error);
+        formMessage.textContent = "Client added successfully";
+        loadClients();
+      } catch (err) {
+        console.error(err);
         formMessage.textContent = "Could not add client";
+        alert("Could not add client");
       }
     }
 
