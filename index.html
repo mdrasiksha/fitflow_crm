@@ -241,6 +241,12 @@
       margin-top: 6px;
     }
 
+    .insight-note {
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-top: 4px;
+    }
+
     .empty-state {
       text-align: center;
       color: var(--muted);
@@ -469,12 +475,16 @@
       const latestWeight = client.latest_weight == null ? "—" : `${client.latest_weight} kg`;
       const previousWeight = client.previous_weight == null ? "" : `<div class="subtle">Prev: ${client.previous_weight} kg</div>`;
       const safeName = escapeHtml(client.name || "");
+      const safeInsight = escapeHtml(client.insight || "");
       const safeGoal = escapeHtml(client.goal || "");
       const safeNotes = escapeHtml(client.notes || "");
 
       return `
         <tr class="${client.status === "at_risk" ? "at-risk-row" : ""}">
-          <td>${safeName}</td>
+          <td>
+            <div>${safeName}</div>
+            <div class="insight-note">${safeInsight}</div>
+          </td>
           <td>${safeGoal}</td>
           <td>
             <input type="text" id="note-${client.id}" placeholder="Add notes" value="${safeNotes}" />

@@ -119,9 +119,18 @@ def calculate_inactive_days(client: models.Client) -> int:
 def dashboard_row(client: models.Client) -> dict:
     inactive_days = calculate_inactive_days(client)
     at_risk = is_at_risk(inactive_days)
+    streak = calculate_streak(client)
     sorted_progress = sorted(client.progress_entries, key=lambda p: (p.date, p.id), reverse=True)
     latest_weight = sorted_progress[0].weight if sorted_progress else None
     previous_weight = sorted_progress[1].weight if len(sorted_progress) > 1 else None
+
+    insight = "💪 Keep going"
+    if streak == 0:
+        insight = "❌ No recent activity"
+    elif inactive_days >= 2:
+        insight = "⚠️ At risk of dropping off"
+    elif streak >= 3:
+        insight = "🔥 Consistent"
 
     return {
         "id": client.id,
@@ -130,9 +139,10 @@ def dashboard_row(client: models.Client) -> dict:
         "notes": client.notes,
         "latest_weight": latest_weight,
         "previous_weight": previous_weight,
-        "streak": calculate_streak(client),
+        "streak": streak,
         "status": "at_risk" if at_risk else "active",
         "inactive_days": inactive_days,
+        "insight": insight,
     }
 
 
