@@ -460,6 +460,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const API = window.location.origin;
+    const apiUrl = (path) => `${API.replace(/\/$/, "")}/${String(path).replace(/^\//, "")}`;
     console.log("API:", API);
 
     const clientRows = document.getElementById("clientRows");
@@ -599,7 +600,7 @@
           throw new Error("Chart.js is not loaded");
         }
 
-        const response = await fetch(API + "/progress/" + clientId);
+        const response = await fetch(apiUrl(`/progress/${clientId}`));
         const payload = await parseJsonResponse(response, "Progress response was not valid JSON");
         console.log("[loadProgress] API response:", payload);
 
@@ -678,7 +679,7 @@
     async function loadClients() {
       tableMessage.textContent = "Loading clients...";
       try {
-        const response = await fetch(API + "/dashboard");
+        const response = await fetch(apiUrl("/dashboard"));
         const payload = await parseJsonResponse(response, "Dashboard response was not valid JSON");
 
         if (!response.ok || !payload.success) {
@@ -705,7 +706,7 @@
 
     async function submitCheckin(clientId, status) {
       try {
-        const response = await fetch(API + "/checkin", {
+        const response = await fetch(apiUrl("/checkin"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ client_id: Number(clientId), status })
@@ -732,7 +733,7 @@
       if (!notesInput) return;
 
       try {
-        const response = await fetch(API + "/clients/" + clientId + "/notes", {
+        const response = await fetch(apiUrl(`/clients/${clientId}/notes`), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ notes: notesInput.value.trim() })
@@ -762,7 +763,7 @@
       }
 
       try {
-        const response = await fetch(API + "/progress", {
+        const response = await fetch(apiUrl("/progress"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ client_id: Number(clientId), weight })
@@ -796,8 +797,8 @@
       }
 
       try {
-        console.log("Request URL:", API + "/clients");
-        const response = await fetch(API + "/clients", {
+        console.log("Request URL:", apiUrl("/clients"));
+        const response = await fetch(apiUrl("/clients"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -831,7 +832,7 @@
       }
 
       try {
-        const response = await fetch(API + "/register", {
+        const response = await fetch(apiUrl("/register"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password })
@@ -861,7 +862,7 @@
       }
 
       try {
-        const response = await fetch(API + "/login", {
+        const response = await fetch(apiUrl("/login"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password })

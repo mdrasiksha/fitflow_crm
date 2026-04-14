@@ -2,7 +2,7 @@ from datetime import date
 from typing import Generator, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -40,6 +40,11 @@ def ensure_schema_updates() -> None:
 
 
 ensure_schema_updates()
+
+
+@app.get("/")
+def home():
+    return FileResponse("static/index.html")
 
 
 @app.exception_handler(RequestValidationError)
@@ -334,9 +339,3 @@ def get_progress(client_id: int, db: Session = Depends(get_db)):
         for p in progress_entries
     ]
 
-
-from fastapi.responses import FileResponse
-
-@app.get("/")
-def serve_home():
-    return FileResponse("static/index.html")
