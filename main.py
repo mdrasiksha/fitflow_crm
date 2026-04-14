@@ -37,6 +37,8 @@ def ensure_schema_updates() -> None:
         }
         if "notes" not in column_names:
             conn.execute(text("ALTER TABLE clients ADD COLUMN notes VARCHAR"))
+        if "user_id" not in column_names:
+            conn.execute(text("ALTER TABLE clients ADD COLUMN user_id INTEGER"))
 
 
 ensure_schema_updates()
@@ -80,6 +82,7 @@ def get_db() -> Generator[Session, None, None]:
 # Pydantic Models
 # ======================
 class ClientCreate(BaseModel):
+    user_id: int
     name: str
     phone: str
     goal: str
@@ -156,7 +159,12 @@ def dashboard_row(client: models.Client) -> dict:
 # ======================
 @app.post("/clients")
 def create_client(client: ClientCreate, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == client.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     new_client = models.Client(
+        user_id=client.user_id,
         name=client.name,
         phone=client.phone,
         goal=client.goal,
@@ -175,8 +183,8 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db)):
 
 
 @app.get("/clients")
-def get_clients(db: Session = Depends(get_db)):
-    clients = db.query(models.Client).all()
+def get_clients(user_id: int, db: Session = Depends(get_db)):
+    clients = db.query(models.Client).filter(models.Client.user_id == user_id).all()
     data = [
         {
             "id": c.id,
@@ -274,9 +282,10 @@ def create_checkin(payload: CheckinCreate, db: Session = Depends(get_db)):
 # Dashboard API
 # ======================
 @app.get("/dashboard")
-def get_dashboard(db: Session = Depends(get_db)):
+def get_dashboard(user_id: int, db: Session = Depends(get_db)):
     clients = (
         db.query(models.Client)
+        .filter(models.Client.user_id == user_id)
         .options(joinedload(models.Client.checkins), joinedload(models.Client.progress_entries))
         .order_by(models.Client.id.desc())
         .all()
