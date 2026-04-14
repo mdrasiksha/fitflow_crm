@@ -352,47 +352,30 @@
       event.preventDefault();
       formMessage.textContent = "Saving...";
 
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const goal = document.getElementById("goal").value.trim();
-
-      const requestPayload = { name, phone, goal };
-      console.log("POST /clients request payload:", requestPayload);
-
-      if (!name || !phone || !goal) {
-        formMessage.textContent = "Please fill in all fields";
-        return;
-      }
+      const formData = new FormData(addClientForm);
+      const payload = {
+        name: formData.get("name")?.toString().trim(),
+        phone: formData.get("phone")?.toString().trim(),
+        goal: formData.get("goal")?.toString().trim()
+      };
 
       try {
         const res = await fetch(API + "/clients", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(requestPayload)
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
         });
-
-        const raw = await res.text();
-        console.log("POST /clients raw response:", raw);
-
-        let responsePayload = {};
+        let payload = {};
         try {
-          responsePayload = raw ? JSON.parse(raw) : {};
+          payload = await res.json();
         } catch {
           throw new Error("Create-client response was not valid JSON");
         }
-
-        if (!res.ok) {
-          console.error("POST /clients failed:", responsePayload);
-          formMessage.textContent = "Could not add client";
-          alert("Failed to add client");
-          return;
-        }
+        console.log("POST /clients response:", payload);
+        if (!res.ok || !payload.success) throw new Error(payload.message || "Create client failed");
 
         addClientForm.reset();
-        formMessage.textContent = "Client added successfully";
-        alert("Client added successfully");
+        formMessage.textContent = `Success: ${payload.message}`;
         await loadClients();
       } catch (error) {
         console.error("addClient failed:", error);
