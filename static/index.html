@@ -430,7 +430,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const API = "https://fitflow-crm.onrender.com/";
+    const API = window.location.origin;
+    console.log("API:", API);
 
     const clientRows = document.getElementById("clientRows");
     const refreshBtn = document.getElementById("refreshBtn");
@@ -555,7 +556,7 @@
           throw new Error("Chart.js is not loaded");
         }
 
-        const response = await fetch(`${API}/progress/${clientId}`);
+        const response = await fetch(API + "/progress/" + clientId);
         const payload = await parseJsonResponse(response, "Progress response was not valid JSON");
         console.log("[loadProgress] API response:", payload);
 
@@ -634,7 +635,7 @@
     async function loadClients() {
       tableMessage.textContent = "Loading clients...";
       try {
-        const response = await fetch(`${API}/dashboard`);
+        const response = await fetch(API + "/dashboard");
         const payload = await parseJsonResponse(response, "Dashboard response was not valid JSON");
 
         if (!response.ok || !payload.success) {
@@ -661,7 +662,7 @@
 
     async function submitCheckin(clientId, status) {
       try {
-        const response = await fetch(`${API}/checkin`, {
+        const response = await fetch(API + "/checkin", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ client_id: Number(clientId), status })
@@ -688,7 +689,7 @@
       if (!notesInput) return;
 
       try {
-        const response = await fetch(`${API}/clients/${clientId}/notes`, {
+        const response = await fetch(API + "/clients/" + clientId + "/notes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ notes: notesInput.value.trim() })
@@ -718,7 +719,7 @@
       }
 
       try {
-        const response = await fetch(`${API}/progress`, {
+        const response = await fetch(API + "/progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ client_id: Number(clientId), weight })
@@ -752,7 +753,8 @@
       }
 
       try {
-        const response = await fetch(`${API}/clients`, {
+        console.log("Request URL:", API + "/clients");
+        const response = await fetch(API + "/clients", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
