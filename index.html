@@ -149,6 +149,16 @@
       background: #fecaca;
     }
 
+    .btn-reminder {
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fdba74;
+    }
+
+    .btn-reminder:hover {
+      background: #ffedd5;
+    }
+
     .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--border);
@@ -189,6 +199,10 @@
       background: #f8faff;
     }
 
+    tbody tr.at-risk-row td {
+      background: #fef2f2;
+    }
+
     .badge {
       border-radius: 999px;
       padding: 4px 10px;
@@ -213,6 +227,14 @@
     .actions {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .risk-note {
+      color: #b91c1c;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-top: 6px;
     }
 
     .empty-state {
@@ -347,7 +369,7 @@
               <th>Goal</th>
               <th>Streak</th>
               <th>Status</th>
-              <th>Check-in</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="clientRows"></tbody>
@@ -421,17 +443,26 @@
       return '<tr><td colspan="5" class="empty-state">No clients yet</td></tr>';
     }
 
+    function riskNote(client) {
+      if (client.status !== "at_risk") return "";
+      return `<div class="risk-note">⚠️ Inactive for ${client.inactive_days} day(s)</div>`;
+    }
+
     function rowTemplate(client) {
       return `
-        <tr>
+        <tr class="${client.status === "at_risk" ? "at-risk-row" : ""}">
           <td>${client.name}</td>
           <td>${client.goal}</td>
           <td>${client.streak}</td>
-          <td>${statusBadge(client.status)}</td>
+          <td>
+            ${statusBadge(client.status)}
+            ${riskNote(client)}
+          </td>
           <td>
             <div class="actions">
               <button class="btn btn-yes" data-id="${client.id}" data-status="yes" type="button">YES</button>
               <button class="btn btn-no" data-id="${client.id}" data-status="no" type="button">NO</button>
+              <button class="btn btn-reminder" data-id="${client.id}" data-action="reminder" type="button">Send Reminder</button>
             </div>
           </td>
         </tr>
@@ -544,6 +575,12 @@
       if (!(target instanceof HTMLButtonElement)) return;
 
       const clientId = target.dataset.id;
+      const action = target.dataset.action;
+      if (action === "reminder") {
+        alert("Reminder sent to client");
+        return;
+      }
+
       const status = target.dataset.status;
       if (!clientId || !status) return;
 
