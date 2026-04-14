@@ -512,7 +512,7 @@
           <span class="subtle" id="progressMeta">Select a client to view progress</span>
         </div>
         <div style="height:320px;">
-          <canvas id="progressChart" aria-label="Client weight progress chart"></canvas>
+          <canvas id="chart" aria-label="Client weight progress chart"></canvas>
         </div>
       `;
       document.querySelector(".container").appendChild(card);
@@ -523,23 +523,33 @@
       const card = getProgressCard();
       const progressMeta = document.getElementById("progressMeta");
       progressMeta.textContent = "Loading progress...";
+      console.log("[loadProgress] Requested clientId:", clientId);
 
       try {
+        if (typeof Chart === "undefined") {
+          throw new Error("Chart.js is not loaded");
+        }
+
         const response = await fetch(`${API}/progress/${clientId}`);
         const payload = await parseJsonResponse(response, "Progress response was not valid JSON");
+        console.log("[loadProgress] API response:", payload);
 
         if (!response.ok || !Array.isArray(payload)) {
           throw new Error("Could not load progress");
         }
 
-        const dates = payload.map((entry) => entry.date);
+        const dates = payload.map((entry) => (entry.date || "").split("T")[0]);
         const weights = payload.map((entry) => entry.weight);
 
         if (progressChart) {
           progressChart.destroy();
         }
 
-        const ctx = document.getElementById("progressChart");
+        const ctx = document.getElementById("chart");
+        if (!ctx) {
+          throw new Error('Canvas with id="chart" not found');
+        }
+
         progressChart = new Chart(ctx, {
           type: "line",
           data: {
