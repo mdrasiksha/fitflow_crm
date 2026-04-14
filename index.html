@@ -159,6 +159,16 @@
       background: #ffedd5;
     }
 
+    .btn-reminder-risk {
+      background: var(--danger);
+      color: #fff;
+      border: 1px solid #b91c1c;
+    }
+
+    .btn-reminder-risk:hover {
+      background: #b91c1c;
+    }
+
     .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--border);
@@ -471,6 +481,7 @@
       const safeName = escapeHtml(client.name || "");
       const safeGoal = escapeHtml(client.goal || "");
       const safeNotes = escapeHtml(client.notes || "");
+      const reminderClass = client.status === "at_risk" ? "btn-reminder btn-reminder-risk" : "btn-reminder";
 
       return `
         <tr class="${client.status === "at_risk" ? "at-risk-row" : ""}">
@@ -496,7 +507,7 @@
               <button class="btn btn-yes" data-id="${client.id}" data-status="yes" type="button">YES</button>
               <button class="btn btn-no" data-id="${client.id}" data-status="no" type="button">NO</button>
               <button class="btn btn-primary" data-id="${client.id}" data-action="view-progress" type="button">View Progress</button>
-              <button class="btn btn-reminder" data-id="${client.id}" data-action="reminder" type="button">Send Reminder</button>
+              <button class="btn ${reminderClass}" data-id="${client.id}" data-action="reminder" type="button">Send Reminder</button>
             </div>
           </td>
         </tr>
