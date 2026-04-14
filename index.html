@@ -352,30 +352,47 @@
       event.preventDefault();
       formMessage.textContent = "Saving...";
 
-      const formData = new FormData(addClientForm);
-      const payload = {
-        name: formData.get("name")?.toString().trim(),
-        phone: formData.get("phone")?.toString().trim(),
-        goal: formData.get("goal")?.toString().trim()
-      };
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const goal = document.getElementById("goal").value.trim();
+
+      const requestPayload = { name, phone, goal };
+      console.log("POST /clients request payload:", requestPayload);
+
+      if (!name || !phone || !goal) {
+        formMessage.textContent = "Please fill in all fields";
+        return;
+      }
 
       try {
         const res = await fetch(API + "/clients", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(requestPayload)
         });
-        let payload = {};
+
+        const raw = await res.text();
+        console.log("POST /clients raw response:", raw);
+
+        let responsePayload = {};
         try {
-          payload = await res.json();
+          responsePayload = raw ? JSON.parse(raw) : {};
         } catch {
           throw new Error("Create-client response was not valid JSON");
         }
-        console.log("POST /clients response:", payload);
-        if (!res.ok || !payload.success) throw new Error(payload.message || "Create client failed");
+
+        if (!res.ok) {
+          console.error("POST /clients failed:", responsePayload);
+          formMessage.textContent = "Could not add client";
+          alert("Failed to add client");
+          return;
+        }
 
         addClientForm.reset();
-        formMessage.textContent = `Success: ${payload.message}`;
+        formMessage.textContent = "Client added successfully";
+        alert("Client added successfully");
         await loadClients();
       } catch (error) {
         console.error("addClient failed:", error);
