@@ -264,11 +264,19 @@
       font-weight: 500;
     }
 
-    form {
+    .client-form,
+    .auth-form {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
       gap: 12px;
       align-items: end;
+    }
+
+    .client-form {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    }
+
+    .auth-form {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) auto auto;
     }
 
     .field {
@@ -349,7 +357,8 @@
     }
 
     @media (max-width: 900px) {
-      form {
+      .client-form,
+      .auth-form {
         grid-template-columns: 1fr;
       }
 
@@ -373,6 +382,26 @@
         <p class="subtitle">Track clients and prevent drop-offs</p>
       </div>
       <button class="btn btn-primary" id="refreshBtn" type="button">Refresh</button>
+    </section>
+
+    <section class="card">
+      <div class="section-head" style="margin-bottom:16px;">
+        <h2>Login</h2>
+        <span class="subtle" id="authStatus">Not logged in</span>
+      </div>
+      <form id="loginForm" class="auth-form">
+        <div class="field">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" name="email" type="email" placeholder="test@gmail.com" required />
+        </div>
+        <div class="field">
+          <label for="authPassword">Password</label>
+          <input id="authPassword" name="password" type="password" placeholder="1234" required />
+        </div>
+        <button class="btn btn-submit" id="loginBtn" type="submit">Login</button>
+        <button class="btn btn-primary" id="registerBtn" type="button">Register</button>
+      </form>
+      <div class="inline-feedback" id="authMessage" aria-live="polite"></div>
     </section>
 
     <section class="card">
@@ -404,7 +433,7 @@
         <h2>Add Client</h2>
       </div>
 
-      <form id="addClientForm">
+      <form id="addClientForm" class="client-form">
         <div class="field">
           <label for="name">Name</label>
           <input id="name" name="name" placeholder="Alex Carter" required />
@@ -438,6 +467,10 @@
     const tableMessage = document.getElementById("tableMessage");
     const formMessage = document.getElementById("formMessage");
     const addClientForm = document.getElementById("addClientForm");
+    const loginForm = document.getElementById("loginForm");
+    const registerBtn = document.getElementById("registerBtn");
+    const authMessage = document.getElementById("authMessage");
+    const authStatus = document.getElementById("authStatus");
     const toast = document.getElementById("toast");
     let progressChart;
 
@@ -455,6 +488,16 @@
     function setFormFeedback(message, type = "success") {
       formMessage.textContent = message;
       formMessage.className = `inline-feedback ${type}`;
+    }
+
+    function setAuthFeedback(message, type = "success") {
+      authMessage.textContent = message;
+      authMessage.className = `inline-feedback ${type}`;
+    }
+
+    function refreshAuthStatus() {
+      const userId = localStorage.getItem("user_id");
+      authStatus.textContent = userId ? `Logged in as user #${userId}` : "Not logged in";
     }
 
     function statusBadge(status) {
@@ -779,6 +822,68 @@
       }
     }
 
+    async function registerUser() {
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value.trim();
+      if (!email || !password) {
+        setAuthFeedback("Please fill in email and password.", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(API + "/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const payload = await parseJsonResponse(response, "Register response was not valid JSON");
+        if (!response.ok) {
+          throw new Error(payload.message || "Registration failed");
+        }
+
+        setAuthFeedback(`Registered successfully (user #${payload.user_id}).`, "success");
+        showToast("Registered successfully", "success");
+      } catch (error) {
+        console.error("registerUser failed:", error);
+        setAuthFeedback(error.message || "Could not register user.", "error");
+        showToast("Could not register user", "error");
+      }
+    }
+
+    async function loginUser(event) {
+      event.preventDefault();
+
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value.trim();
+      if (!email || !password) {
+        setAuthFeedback("Please fill in email and password.", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(API + "/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const payload = await parseJsonResponse(response, "Login response was not valid JSON");
+
+        if (!response.ok || !payload.user_id) {
+          throw new Error(payload.message || "Login failed");
+        }
+
+        localStorage.setItem("user_id", String(payload.user_id));
+        refreshAuthStatus();
+        setAuthFeedback("Login successful.", "success");
+        showToast("Login successful", "success");
+      } catch (error) {
+        console.error("loginUser failed:", error);
+        setAuthFeedback(error.message || "Could not login.", "error");
+        showToast("Could not login", "error");
+      }
+    }
+
     clientRows.addEventListener("click", (event) => {
       const target = event.target;
       if (!(target instanceof HTMLButtonElement)) return;
@@ -810,7 +915,10 @@
 
     refreshBtn.addEventListener("click", loadClients);
     addClientForm.addEventListener("submit", addClient);
+    loginForm.addEventListener("submit", loginUser);
+    registerBtn.addEventListener("click", registerUser);
 
+    refreshAuthStatus();
     loadClients();
   </script>
 </body>
