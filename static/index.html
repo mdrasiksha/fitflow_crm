@@ -3,351 +3,1155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FitFlow Auth</title>
+  <title>FitFlow Dashboard</title>
   <style>
     :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --text: #0f172a;
+      --muted: #94a3b8;
+      --border: #e2e8f0;
       --primary: #4f46e5;
       --primary-dark: #4338ca;
-      --bg-start: #eef2ff;
-      --bg-end: #f8fafc;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #dbe3ef;
+      --success: #16a34a;
       --danger: #dc2626;
-      --shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
-      --radius: 16px;
+      --warning: #f97316;
+      --success-soft: #dcfce7;
+      --danger-soft: #fee2e2;
+      --radius: 12px;
+      --shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.07);
+      --shadow-md: 0 12px 32px rgba(15, 23, 42, 0.12);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; }
 
     body {
+      margin: 0;
       min-height: 100vh;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
       color: var(--text);
-      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+    }
+
+    .app-shell {
       display: grid;
-      place-items: center;
-      padding: 20px;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
     }
 
-    .auth-card {
-      width: min(100%, 420px);
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 30px;
-      box-shadow: var(--shadow);
-      border: 1px solid #edf2f7;
+    .sidebar {
+      background: #111827;
+      color: #e2e8f0;
+      padding: 24px 16px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 22px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    .heading {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .heading h1 {
-      font-size: 1.8rem;
+    .logo {
+      font-size: 1.2rem;
+      font-weight: 800;
       letter-spacing: -0.02em;
-      margin-bottom: 8px;
+      color: #fff;
     }
 
-    .heading p {
-      color: var(--muted);
-      font-size: 0.97rem;
-    }
+    .logo span { color: #a5b4fc; }
 
-    .tabs {
+    .menu {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: #f1f5f9;
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 20px;
-      gap: 4px;
+      align-content: start;
+      gap: 8px;
     }
 
-    .tab-btn {
-      border: 0;
-      border-radius: 10px;
-      background: transparent;
-      color: #334155;
-      font-weight: 700;
-      font-size: 0.95rem;
+    .menu-item {
       padding: 10px 12px;
-      cursor: pointer;
+      border-radius: 10px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-weight: 600;
       transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .tab-btn.active {
-      background: #ffffff;
-      color: var(--primary);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    .menu-item:hover,
+    .menu-item.active {
+      background: rgba(79, 70, 229, 0.22);
+      color: #fff;
+      cursor: pointer;
     }
 
-    .auth-form {
-      display: none;
+    .main-area {
+      min-width: 0;
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 14px;
+      flex-wrap: wrap;
     }
 
-    .auth-form.active {
-      display: grid;
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 260px;
     }
 
-    .field {
-      display: grid;
-      gap: 6px;
-    }
-
-    .field label {
-      font-size: 0.86rem;
-      font-weight: 600;
-      color: #334155;
-    }
-
-    .input {
-      width: 100%;
+    .menu-toggle {
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 13px;
-      font-size: 0.96rem;
+      background: #fff;
+      border-radius: 10px;
+      width: 38px;
+      height: 38px;
+      cursor: pointer;
+      display: none;
+      font-weight: 700;
+    }
+
+    .search {
+      width: 100%;
+      max-width: 440px;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
       outline: none;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .input::placeholder {
-      color: #94a3b8;
-    }
-
-    .input:focus {
-      border-color: var(--primary);
+    .search:focus {
+      border-color: #c7d2fe;
       box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
     }
 
-    .error {
-      min-height: 16px;
-      color: var(--danger);
-      font-size: 0.82rem;
-      line-height: 1.2;
+    .profile-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      padding: 6px 12px 6px 6px;
+      font-size: 0.88rem;
+      font-weight: 700;
     }
 
-    .form-link {
-      text-align: right;
-      margin-top: -6px;
-      margin-bottom: 4px;
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.78rem;
     }
 
-    .form-link a {
-      color: var(--primary);
-      text-decoration: none;
-      font-size: 0.86rem;
+    .section-title {
+      margin: 0;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .section-subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card,
+    .card,
+    .client-item {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid #eef2f7;
+    }
+
+    .stat-card {
+      padding: 18px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover,
+    .card:hover,
+    .client-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: inline-grid;
+      place-items: center;
+      font-size: 1rem;
+      background: #eef2ff;
+    }
+
+    .stat-label {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      margin: 10px 0 0;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .danger { color: var(--danger); }
+    .success { color: var(--success); }
+
+    .card { padding: 18px; }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    h2 { margin: 0; font-size: 1.08rem; }
+
+    .subtle {
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.16s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 1px 2px rgba(2, 6, 23, 0.08);
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(1px); }
+
+    .btn-primary { background: #eef2ff; color: var(--primary); }
+    .btn-primary:hover { background: #e0e7ff; }
+    .btn-submit { background: var(--primary); color: #fff; }
+    .btn-submit:hover { background: var(--primary-dark); }
+    .btn-yes { background: var(--success-soft); color: #166534; border: 1px solid #86efac; }
+    .btn-yes:hover { background: #bbf7d0; }
+    .btn-no { background: var(--danger-soft); color: #991b1b; border: 1px solid #fca5a5; }
+    .btn-no:hover { background: #fecaca; }
+    .btn-reminder { background: #fff7ed; color: #9a3412; border: 1px solid #fdba74; }
+    .btn-reminder:hover { background: #ffedd5; }
+    .btn-reminder-risk { background: var(--danger); color: #fff; border: 1px solid #b91c1c; }
+    .btn-reminder-risk:hover { background: #b91c1c; }
+
+    .client-list { display: grid; gap: 12px; }
+
+    .client-item {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .client-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .client-name { margin: 0; font-size: 1.02rem; font-weight: 800; }
+
+    .insight-note {
+      margin-top: 4px;
+      color: #64748b;
+      font-size: 0.87rem;
+      line-height: 1.4;
+    }
+
+    .client-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .meta-box {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      background: var(--surface-soft);
+    }
+
+    .meta-label {
+      margin: 0;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .meta-value { margin: 4px 0 0; font-size: 0.92rem; font-weight: 700; }
+
+    .badge {
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .badge-active { color: #166534; background: var(--success-soft); }
+    .badge-risk { color: #991b1b; background: var(--danger-soft); }
+    .badge-neutral { color: #334155; background: #e2e8f0; }
+
+    .risk-note { margin-top: 6px; color: var(--warning); font-size: 0.82rem; font-weight: 700; }
+    .risk-note-medium { color: #854d0e; }
+
+    .client-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .editor-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .editor-panel {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      background: var(--surface-soft);
+      display: grid;
+      gap: 8px;
+    }
+
+    .editor-title {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .editor-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .editor-inline input { flex: 1; min-width: 150px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 22px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: var(--surface-soft);
       font-weight: 600;
     }
 
-    .form-link a:hover {
-      text-decoration: underline;
+    .client-form,
+    .auth-form {
+      display: grid;
+      gap: 12px;
+      align-items: end;
     }
 
-    .submit-btn {
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-size: 0.96rem;
-      font-weight: 700;
-      color: #ffffff;
-      background: var(--primary);
-      cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.2s ease;
+    .client-form { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; }
+    .auth-form { grid-template-columns: repeat(2, minmax(0, 1fr)) auto auto; }
+
+    .field { display: grid; gap: 6px; }
+
+    label { font-size: 0.82rem; color: #64748b; font-weight: 700; }
+
+    input {
       width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.94rem;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .submit-btn:hover:not(:disabled) {
-      background: var(--primary-dark);
-      transform: translateY(-1px);
+    input:focus {
+      border-color: #c7d2fe;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
     }
 
-    .submit-btn:disabled {
-      cursor: wait;
-      opacity: 0.75;
-      transform: none;
+    .inline-feedback {
+      margin-top: 10px;
+      font-size: 0.88rem;
+      min-height: 20px;
+      font-weight: 600;
     }
 
-    @media (max-width: 480px) {
-      body {
-        padding: 14px;
+    .inline-feedback.success { color: #166534; }
+    .inline-feedback.error { color: #b91c1c; }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #111827;
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 100;
+      max-width: 320px;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: #14532d; }
+    .toast.error { background: #7f1d1d; }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      font-size: 18px;
+      padding: 16px;
+    }
+
+    #loading p { margin: 0; color: #64748b; }
+
+    @media (max-width: 1024px) {
+      .stats-grid,
+      .client-meta,
+      .editor-row,
+      .client-form,
+      .auth-form {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app-shell { grid-template-columns: 1fr; }
+
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 250px;
+        transform: translateX(-105%);
+        transition: transform 0.24s ease;
+        z-index: 120;
       }
 
-      .auth-card {
-        padding: 22px;
-      }
+      .sidebar.open { transform: translateX(0); }
 
-      .heading h1 {
-        font-size: 1.5rem;
-      }
+      .menu-toggle { display: inline-grid; place-items: center; }
+
+      .main-area { padding: 14px; }
     }
   </style>
 </head>
 <body>
-  <main class="auth-card" aria-live="polite">
-    <header class="heading">
-      <h1>Welcome to FitFlow</h1>
-      <p>Track clients and never lose them</p>
-    </header>
+  <div id="loading">
+    <h2>Loading app... ⏳</h2>
+    <p>Please wait a few seconds</p>
+  </div>
 
-    <div class="tabs" role="tablist" aria-label="Authentication tabs">
-      <button type="button" class="tab-btn active" id="loginTab" data-target="loginForm" role="tab" aria-selected="true">Login</button>
-      <button type="button" class="tab-btn" id="signupTab" data-target="signupForm" role="tab" aria-selected="false">Signup</button>
-    </div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">Fit<span>Flow</span></div>
+      <nav class="menu" aria-label="Main navigation">
+        <a class="menu-item active" href="#">Dashboard</a>
+        <a class="menu-item" href="#">Clients</a>
+        <a class="menu-item" href="#">Insights</a>
+      </nav>
+    </aside>
 
-    <form id="loginForm" class="auth-form active" novalidate>
-      <div class="field">
-        <label for="loginEmail">Email</label>
-        <input id="loginEmail" class="input" type="email" placeholder="you@fitflow.com" autocomplete="email" required />
-        <p class="error" data-error-for="loginEmail"></p>
-      </div>
+    <main class="main-area container">
+      <section class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle sidebar">☰</button>
+          <input class="search" type="search" placeholder="Search clients, goals, notes..." aria-label="Search" />
+          <button class="btn btn-primary" id="refreshBtn" type="button">Refresh</button>
+        </div>
+        <div class="profile-chip" title="Current user">
+          <span class="avatar">FF</span>
+          <span id="authStatus">Not logged in</span>
+        </div>
+      </section>
 
-      <div class="field">
-        <label for="loginPassword">Password</label>
-        <input id="loginPassword" class="input" type="password" placeholder="Enter your password" autocomplete="current-password" required minlength="6" />
-        <p class="error" data-error-for="loginPassword"></p>
-      </div>
+      <section>
+        <h1 class="section-title">Dashboard</h1>
+        <p class="section-subtitle">Track clients and prevent drop-offs with fast daily workflows.</p>
+      </section>
 
-      <p class="form-link"><a href="#" aria-label="Forgot password">Forgot Password?</a></p>
-      <button type="submit" class="submit-btn">Login</button>
-    </form>
+      <section class="stats-grid" aria-label="Client summary metrics">
+        <article class="stat-card">
+          <div class="stat-top">
+            <p class="stat-label">At Risk Clients</p>
+            <span class="stat-icon">🚨</span>
+          </div>
+          <p class="stat-value danger" id="atRiskCount">0</p>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top">
+            <p class="stat-label">Active Clients</p>
+            <span class="stat-icon">🔥</span>
+          </div>
+          <p class="stat-value success" id="activeCount">0</p>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top">
+            <p class="stat-label">Total Clients</p>
+            <span class="stat-icon">👥</span>
+          </div>
+          <p class="stat-value" id="totalCount">0</p>
+        </article>
+      </section>
 
-    <form id="signupForm" class="auth-form" novalidate>
-      <div class="field">
-        <label for="signupName">Name</label>
-        <input id="signupName" class="input" type="text" placeholder="Your full name" autocomplete="name" required minlength="2" />
-        <p class="error" data-error-for="signupName"></p>
-      </div>
+      <section class="card">
+        <div class="section-head" style="margin-bottom:16px;">
+          <h2>Login</h2>
+        </div>
+        <form id="loginForm" class="auth-form">
+          <div class="field">
+            <label for="authEmail">Email</label>
+            <input id="authEmail" name="email" type="email" placeholder="test@gmail.com" required />
+          </div>
+          <div class="field">
+            <label for="authPassword">Password</label>
+            <input id="authPassword" name="password" type="password" placeholder="1234" required />
+          </div>
+          <button class="btn btn-submit" id="loginBtn" type="submit">Login</button>
+          <button class="btn btn-primary" id="registerBtn" type="button">Register</button>
+        </form>
+        <div class="inline-feedback" id="authMessage" aria-live="polite"></div>
+      </section>
 
-      <div class="field">
-        <label for="signupPhone">Phone</label>
-        <input id="signupPhone" class="input" type="tel" placeholder="(555) 123-4567" autocomplete="tel" required />
-        <p class="error" data-error-for="signupPhone"></p>
-      </div>
+      <section class="card">
+        <div class="section-head">
+          <h2>Clients</h2>
+          <span class="subtle" id="tableMessage" aria-live="polite"></span>
+        </div>
+        <div class="client-list" id="clientRows"></div>
+      </section>
 
-      <div class="field">
-        <label for="signupEmail">Email</label>
-        <input id="signupEmail" class="input" type="email" placeholder="you@fitflow.com" autocomplete="email" required />
-        <p class="error" data-error-for="signupEmail"></p>
-      </div>
+      <section class="card">
+        <div class="section-head" style="margin-bottom:16px;">
+          <h2>Add Client</h2>
+        </div>
+        <form id="addClientForm" class="client-form">
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" name="name" placeholder="Alex Carter" required />
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" placeholder="(555) 123-4567" required />
+          </div>
+          <div class="field">
+            <label for="goal">Goal</label>
+            <input id="goal" name="goal" placeholder="Lose 10 lbs" required />
+          </div>
+          <button class="btn btn-submit" type="submit">Add Client</button>
+        </form>
+        <div class="inline-feedback" id="formMessage" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
 
-      <div class="field">
-        <label for="signupPassword">Password</label>
-        <input id="signupPassword" class="input" type="password" placeholder="Create a secure password" autocomplete="new-password" required minlength="6" />
-        <p class="error" data-error-for="signupPassword"></p>
-      </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-      <button type="submit" class="submit-btn">Create Account</button>
-    </form>
-  </main>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const tabs = document.querySelectorAll('.tab-btn');
-    const forms = document.querySelectorAll('.auth-form');
+    const API = window.location.origin;
+    console.log("API:", API);
 
-    function switchTab(targetId) {
-      tabs.forEach((tab) => {
-        const isActive = tab.dataset.target === targetId;
-        tab.classList.toggle('active', isActive);
-        tab.setAttribute('aria-selected', String(isActive));
+    const sidebar = document.getElementById("sidebar");
+    const menuToggle = document.getElementById("menuToggle");
+    const clientRows = document.getElementById("clientRows");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const tableMessage = document.getElementById("tableMessage");
+    const formMessage = document.getElementById("formMessage");
+    const addClientForm = document.getElementById("addClientForm");
+    const loginForm = document.getElementById("loginForm");
+    const registerBtn = document.getElementById("registerBtn");
+    const authMessage = document.getElementById("authMessage");
+    const authStatus = document.getElementById("authStatus");
+    const toast = document.getElementById("toast");
+    const loading = document.getElementById("loading");
+    const atRiskCount = document.getElementById("atRiskCount");
+    const activeCount = document.getElementById("activeCount");
+    const totalCount = document.getElementById("totalCount");
+    let progressChart;
+
+    let toastTimeout;
+
+    if (menuToggle && sidebar) {
+      menuToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
       });
-
-      forms.forEach((form) => {
-        const active = form.id === targetId;
-        form.classList.toggle('active', active);
-      });
     }
 
-    tabs.forEach((tab) => {
-      tab.addEventListener('click', () => switchTab(tab.dataset.target));
-    });
-
-    function setError(input, message) {
-      const errorNode = document.querySelector(`[data-error-for="${input.id}"]`);
-      if (errorNode) {
-        errorNode.textContent = message;
-      }
-      input.setAttribute('aria-invalid', message ? 'true' : 'false');
+    function showToast(message, type = "success") {
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.className = "toast";
+      }, 2800);
     }
 
-    function validateInput(input) {
-      const value = input.value.trim();
-
-      if (input.validity.valueMissing) {
-        setError(input, 'This field is required.');
-        return false;
-      }
-
-      if (input.type === 'email' && input.validity.typeMismatch) {
-        setError(input, 'Please enter a valid email address.');
-        return false;
-      }
-
-      if (input.id.toLowerCase().includes('password') && value.length < 6) {
-        setError(input, 'Password must be at least 6 characters.');
-        return false;
-      }
-
-      if (input.id === 'signupPhone' && !/^[+()\-\s\d]{7,}$/.test(value)) {
-        setError(input, 'Please enter a valid phone number.');
-        return false;
-      }
-
-      if (input.id === 'signupName' && value.length < 2) {
-        setError(input, 'Please enter your full name.');
-        return false;
-      }
-
-      setError(input, '');
-      return true;
+    function setFormFeedback(message, type = "success") {
+      formMessage.textContent = message;
+      formMessage.className = `inline-feedback ${type}`;
     }
 
-    function setLoadingState(form, loading) {
-      const button = form.querySelector('.submit-btn');
-      if (!button) return;
-
-      if (!button.dataset.defaultText) {
-        button.dataset.defaultText = button.textContent;
-      }
-
-      button.disabled = loading;
-      button.textContent = loading ? 'Loading...' : button.dataset.defaultText;
+    function setAuthFeedback(message, type = "success") {
+      authMessage.textContent = message;
+      authMessage.className = `inline-feedback ${type}`;
     }
 
-    forms.forEach((form) => {
-      const inputs = form.querySelectorAll('input');
+    function refreshAuthStatus() {
+      const userId = localStorage.getItem("user_id");
+      authStatus.textContent = userId ? `Logged in • User #${userId}` : "Not logged in";
+    }
 
-      inputs.forEach((input) => {
-        input.addEventListener('input', () => validateInput(input));
-      });
+    function getCurrentUserId() {
+      return localStorage.getItem("user_id");
+    }
 
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    function hideLoading() {
+      if (loading) {
+        loading.style.display = "none";
+      }
+    }
 
-        let isValid = true;
-        inputs.forEach((input) => {
-          const valid = validateInput(input);
-          if (!valid) isValid = false;
+    function requireUserId() {
+      const userId = getCurrentUserId();
+      if (!userId) {
+        throw new Error("Please login first");
+      }
+      return Number(userId);
+    }
+
+    function updateSummaryCards(clients = []) {
+      const atRisk = clients.filter((client) => client.status === "at_risk").length;
+      const active = clients.filter((client) => client.status === "active").length;
+      atRiskCount.textContent = String(atRisk);
+      activeCount.textContent = String(active);
+      totalCount.textContent = String(clients.length);
+    }
+
+    function statusBadge(status) {
+      if (status === "at_risk") {
+        return '<span class="badge badge-risk">At Risk</span>';
+      }
+      if (status === "active") {
+        return '<span class="badge badge-active">Active</span>';
+      }
+      return '<span class="badge badge-neutral">Neutral</span>';
+    }
+
+    function emptyStateRow() {
+      return '<div class="empty-state">No clients yet</div>';
+    }
+
+    function riskNote(client) {
+      if (client.status !== "at_risk") return "";
+      if (client.insight) {
+        return '<div class="risk-note">⚠️ Might drop off</div>';
+      }
+      const noteClass = client.risk_level === "medium" ? "risk-note risk-note-medium" : "risk-note";
+      return `<div class="${noteClass}">⚠️ Inactive for ${client.inactive_days} days</div>`;
+    }
+
+    function escapeHtml(value = "") {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function rowTemplate(client) {
+      const latestWeight = client.latest_weight == null ? "—" : `${client.latest_weight} kg`;
+      const previousWeight = client.previous_weight == null ? "—" : `${client.previous_weight} kg`;
+      const safeName = escapeHtml(client.name || "");
+      const safeInsight = escapeHtml(client.insight || "⚠️ Might drop off");
+      const safeGoal = escapeHtml(client.goal || "Not set");
+      const safeNotes = escapeHtml(client.notes || "");
+      const reminderClass = client.status === "at_risk" ? "btn-reminder btn-reminder-risk" : "btn-reminder";
+
+      return `
+        <article class="client-item">
+          <div class="client-top">
+            <div>
+              <h3 class="client-name">${safeName}</h3>
+              <div class="insight-note">${safeInsight}</div>
+            </div>
+            <div>
+              ${statusBadge(client.status)}
+              ${riskNote(client)}
+            </div>
+          </div>
+
+          <div class="client-meta">
+            <div class="meta-box">
+              <p class="meta-label">Goal</p>
+              <p class="meta-value">${safeGoal}</p>
+            </div>
+            <div class="meta-box">
+              <p class="meta-label">Streak</p>
+              <p class="meta-value">${client.streak}</p>
+            </div>
+            <div class="meta-box">
+              <p class="meta-label">Weight</p>
+              <p class="meta-value">${latestWeight} <span class="subtle">(prev ${previousWeight})</span></p>
+            </div>
+          </div>
+
+          <div class="client-actions">
+            <button class="btn btn-yes" data-id="${client.id}" data-status="yes" type="button">YES</button>
+            <button class="btn btn-no" data-id="${client.id}" data-status="no" type="button">NO</button>
+            <button class="btn btn-primary" data-id="${client.id}" data-action="view-progress" type="button">View Progress</button>
+            <button class="btn ${reminderClass}" data-id="${client.id}" data-action="reminder" type="button">Send Reminder</button>
+          </div>
+
+          <div class="editor-row">
+            <div class="editor-panel">
+              <p class="editor-title">Notes</p>
+              <div class="editor-inline">
+                <input type="text" id="note-${client.id}" placeholder="Add notes" value="${safeNotes}" />
+                <button class="btn btn-submit" data-id="${client.id}" data-action="save-notes" type="button">Save</button>
+              </div>
+            </div>
+
+            <div class="editor-panel">
+              <p class="editor-title">Weight Update</p>
+              <div class="editor-inline">
+                <input type="number" step="0.1" id="weight-${client.id}" placeholder="Enter weight" />
+                <button class="btn btn-submit" data-id="${client.id}" data-action="update-weight" type="button">Update</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function getProgressCard() {
+      let card = document.getElementById("progressCard");
+      if (card) return card;
+
+      card = document.createElement("section");
+      card.id = "progressCard";
+      card.className = "card";
+      card.innerHTML = `
+        <div class="section-head">
+          <h2>Weight Progress</h2>
+          <span class="subtle" id="progressMeta">Select a client to view progress</span>
+        </div>
+        <div style="height:320px;">
+          <canvas id="chart" aria-label="Client weight progress chart"></canvas>
+        </div>
+      `;
+      document.querySelector(".container").appendChild(card);
+      return card;
+    }
+
+    async function loadProgress(clientId) {
+      const card = getProgressCard();
+      const progressMeta = document.getElementById("progressMeta");
+      progressMeta.textContent = "Loading progress...";
+
+      try {
+        if (typeof Chart === "undefined") {
+          throw new Error("Chart.js is not loaded");
+        }
+
+        const response = await fetch(API + "/progress/" + clientId);
+        const payload = await parseJsonResponse(response, "Progress response was not valid JSON");
+
+        if (!response.ok || !Array.isArray(payload)) {
+          throw new Error("Could not load progress");
+        }
+
+        const dates = payload.map((entry) => (entry.date || "").split("T")[0]);
+        const weights = payload.map((entry) => entry.weight);
+
+        if (progressChart) {
+          progressChart.destroy();
+        }
+
+        const ctx = document.getElementById("chart");
+        if (!ctx) {
+          throw new Error('Canvas with id="chart" not found');
+        }
+
+        progressChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: dates,
+            datasets: [{
+              label: "Weight (kg)",
+              data: weights,
+              borderColor: "#4f46e5",
+              backgroundColor: "rgba(79, 70, 229, 0.15)",
+              tension: 0.35,
+              pointRadius: 4,
+              pointHoverRadius: 5,
+              fill: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { tooltip: { enabled: true }, legend: { display: false } },
+            scales: {
+              x: { title: { display: true, text: "Date" } },
+              y: { title: { display: true, text: "Weight" } }
+            }
+          }
         });
 
-        if (!isValid) return;
+        progressMeta.textContent = dates.length
+          ? `Showing ${dates.length} entries for client #${clientId}`
+          : `No progress entries for client #${clientId}`;
+        card.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (error) {
+        console.error("loadProgress failed:", error);
+        progressMeta.textContent = "Failed to load progress";
+        showToast("Could not load progress chart", "error");
+      }
+    }
 
-        setLoadingState(form, true);
+    async function parseJsonResponse(response, fallbackMessage) {
+      let payload = {};
+      try {
+        payload = await response.json();
+      } catch {
+        throw new Error(fallbackMessage);
+      }
+      return payload;
+    }
 
-        try {
-          await new Promise((resolve) => setTimeout(resolve, 1200));
-        } finally {
-          setLoadingState(form, false);
+    async function loadClients() {
+      tableMessage.textContent = "Loading clients...";
+      try {
+        const userId = getCurrentUserId();
+        if (!userId) {
+          clientRows.innerHTML = emptyStateRow();
+          tableMessage.textContent = "Login to view your clients";
+          updateSummaryCards([]);
+          return;
         }
-      });
+        const response = await fetch(API + "/dashboard?user_id=" + userId);
+        const payload = await parseJsonResponse(response, "Dashboard response was not valid JSON");
+
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || "Could not load dashboard");
+        }
+
+        const clients = payload.data || [];
+        updateSummaryCards(clients);
+
+        if (clients.length === 0) {
+          clientRows.innerHTML = emptyStateRow();
+          tableMessage.textContent = "No clients yet";
+          return;
+        }
+
+        clientRows.innerHTML = clients.map(rowTemplate).join("");
+        tableMessage.textContent = `${clients.length} client(s)`;
+      } catch (error) {
+        console.error("loadClients failed:", error);
+        clientRows.innerHTML = emptyStateRow();
+        tableMessage.textContent = "Failed to load clients";
+        updateSummaryCards([]);
+        showToast("Failed to load clients", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function submitCheckin(clientId, status) {
+      try {
+        const response = await fetch(API + "/checkin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client_id: Number(clientId), status })
+        });
+
+        const payload = await parseJsonResponse(response, "Check-in response was not valid JSON");
+
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || "Check-in failed");
+        }
+
+        tableMessage.textContent = payload.message || "Check-in saved";
+        showToast(payload.message || "Check-in saved", "success");
+        await loadClients();
+      } catch (error) {
+        console.error("submitCheckin failed:", error);
+        tableMessage.textContent = "Could not save check-in";
+        showToast("Could not save check-in", "error");
+      }
+    }
+
+    async function saveNotes(clientId) {
+      const notesInput = document.getElementById(`note-${clientId}`);
+      if (!notesInput) return;
+
+      try {
+        const response = await fetch(API + "/clients/" + clientId + "/notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notes: notesInput.value.trim() })
+        });
+
+        const payload = await parseJsonResponse(response, "Notes response was not valid JSON");
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || "Could not save notes");
+        }
+
+        showToast("Notes saved", "success");
+        tableMessage.textContent = "Notes saved";
+      } catch (error) {
+        console.error("saveNotes failed:", error);
+        showToast("Could not save notes", "error");
+      }
+    }
+
+    async function updateWeight(clientId) {
+      const weightInput = document.getElementById(`weight-${clientId}`);
+      if (!weightInput) return;
+
+      const weight = Number(weightInput.value);
+      if (!weightInput.value || Number.isNaN(weight)) {
+        showToast("Enter a valid weight", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(API + "/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client_id: Number(clientId), weight })
+        });
+
+        const payload = await parseJsonResponse(response, "Progress response was not valid JSON");
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || "Could not update weight");
+        }
+
+        showToast("Weight updated", "success");
+        tableMessage.textContent = "Weight updated";
+        await loadClients();
+      } catch (error) {
+        console.error("updateWeight failed:", error);
+        showToast("Could not update weight", "error");
+      }
+    }
+
+    async function addClient(event) {
+      event.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const goal = document.getElementById("goal").value.trim();
+
+      if (!name || !phone || !goal) {
+        setFormFeedback("Please fill in name, phone, and goal.", "error");
+        showToast("Please fill in all fields", "error");
+        return;
+      }
+
+      try {
+        const userId = requireUserId();
+        const response = await fetch(API + "/clients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, phone, goal, user_id: userId })
+        });
+
+        const payload = await parseJsonResponse(response, "Client response was not valid JSON");
+
+        if (!response.ok) {
+          throw new Error(payload.message || "Could not add client");
+        }
+
+        addClientForm.reset();
+        setFormFeedback("Client added successfully.", "success");
+        showToast("Client added successfully", "success");
+        await loadClients();
+      } catch (error) {
+        console.error("addClient failed:", error);
+        setFormFeedback("Could not add client. Please try again.", "error");
+        showToast("Could not add client", "error");
+      }
+    }
+
+    async function registerUser() {
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value.trim();
+      if (!email || !password) {
+        setAuthFeedback("Please fill in email and password.", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(API + "/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const payload = await parseJsonResponse(response, "Register response was not valid JSON");
+        if (!response.ok) {
+          throw new Error(payload.message || "Registration failed");
+        }
+
+        setAuthFeedback(`Registered successfully (user #${payload.user_id}).`, "success");
+        showToast("Registered successfully", "success");
+      } catch (error) {
+        console.error("registerUser failed:", error);
+        setAuthFeedback(error.message || "Could not register user.", "error");
+        showToast("Could not register user", "error");
+      }
+    }
+
+    async function loginUser(event) {
+      event.preventDefault();
+
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value.trim();
+      if (!email || !password) {
+        setAuthFeedback("Please fill in email and password.", "error");
+        return;
+      }
+
+      try {
+        const response = await fetch(API + "/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const payload = await parseJsonResponse(response, "Login response was not valid JSON");
+
+        if (!response.ok || !payload.user_id) {
+          throw new Error(payload.message || "Login failed");
+        }
+
+        localStorage.setItem("user_id", String(payload.user_id));
+        refreshAuthStatus();
+        setAuthFeedback("Login successful.", "success");
+        showToast("Login successful", "success");
+        await loadClients();
+      } catch (error) {
+        console.error("loginUser failed:", error);
+        setAuthFeedback(error.message || "Could not login.", "error");
+        showToast("Could not login", "error");
+      }
+    }
+
+    clientRows.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+
+      const clientId = target.dataset.id;
+      const action = target.dataset.action;
+      if (action === "save-notes" && clientId) {
+        saveNotes(clientId);
+        return;
+      }
+      if (action === "update-weight" && clientId) {
+        updateWeight(clientId);
+        return;
+      }
+      if (action === "view-progress" && clientId) {
+        loadProgress(clientId);
+        return;
+      }
+      if (action === "reminder") {
+        alert("Reminder sent to client");
+        return;
+      }
+
+      const status = target.dataset.status;
+      if (!clientId || !status) return;
+
+      submitCheckin(clientId, status);
     });
+
+    refreshBtn.addEventListener("click", loadClients);
+    addClientForm.addEventListener("submit", addClient);
+    loginForm.addEventListener("submit", loginUser);
+    registerBtn.addEventListener("click", registerUser);
+    window.onload = function () {
+      if (!localStorage.getItem("user_id")) {
+        hideLoading();
+      }
+    };
+
+    refreshAuthStatus();
+    if (localStorage.getItem("user_id")) {
+      loadClients();
+    } else {
+      clientRows.innerHTML = emptyStateRow();
+      tableMessage.textContent = "Login to view your clients";
+      updateSummaryCards([]);
+      hideLoading();
+    }
   </script>
 </body>
 </html>
