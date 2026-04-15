@@ -141,13 +141,21 @@ def dashboard_row(client: models.Client) -> dict:
     latest_weight = sorted_progress[0].weight if sorted_progress else None
     previous_weight = sorted_progress[1].weight if len(sorted_progress) > 1 else None
 
+    weight_decreased = (
+        latest_weight is not None
+        and previous_weight is not None
+        and latest_weight < previous_weight
+    )
+
     insight = "💪 Keep going"
-    if streak == 0:
-        insight = "❌ No recent activity"
+    if streak >= 3:
+        insight = f"🔥 Consistent for {streak} days"
     elif inactive_days >= 2:
-        insight = "⚠️ At risk of dropping off"
-    elif streak >= 3:
-        insight = "🔥 Consistent"
+        insight = "⚠️ Might drop off soon"
+    elif streak == 0:
+        insight = "❌ No recent activity"
+    elif weight_decreased:
+        insight = "📉 Good progress"
 
     return {
         "id": client.id,
