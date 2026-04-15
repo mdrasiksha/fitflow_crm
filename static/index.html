@@ -765,7 +765,7 @@
             <button class="btn btn-yes" data-id="${client.id}" data-status="yes" type="button">YES</button>
             <button class="btn btn-no" data-id="${client.id}" data-status="no" type="button">NO</button>
             <button class="btn btn-primary" data-id="${client.id}" data-action="view-progress" type="button">View Progress</button>
-            <button class="btn ${reminderClass}" data-id="${client.id}" data-action="reminder" type="button">Send Reminder</button>
+            <button class="btn ${reminderClass}" onclick="sendReminder(${client.id})" type="button">Send Reminder</button>
           </div>
 
           <div class="editor-row">
@@ -1003,6 +1003,28 @@
       }
     }
 
+    async function sendReminder(clientId) {
+      try {
+        const response = await fetch(API + "/reminder", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ client_id: Number(clientId) })
+        });
+
+        const payload = await parseJsonResponse(response, "Reminder response was not valid JSON");
+        if (!response.ok) {
+          throw new Error(payload.message || "Failed to send reminder");
+        }
+
+        alert(payload.message);
+      } catch (error) {
+        console.error("sendReminder failed:", error);
+        alert("Failed to send reminder");
+      }
+    }
+
     async function addClient(event) {
       event.preventDefault();
 
@@ -1122,11 +1144,6 @@
         loadProgress(clientId);
         return;
       }
-      if (action === "reminder") {
-        alert("Reminder sent to client");
-        return;
-      }
-
       const status = target.dataset.status;
       if (!clientId || !status) return;
 
