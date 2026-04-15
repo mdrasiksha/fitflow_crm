@@ -274,9 +274,10 @@
     }
 
     .insight-note {
-      color: var(--muted);
-      font-size: 0.84rem;
-      margin-top: 4px;
+      color: #6b7280;
+      font-size: 0.78rem;
+      margin-top: 3px;
+      line-height: 1.35;
     }
 
     .empty-state {
@@ -618,6 +619,7 @@
       const safeInsight = escapeHtml(client.insight || "");
       const safeGoal = escapeHtml(client.goal || "");
       const safeNotes = escapeHtml(client.notes || "");
+      const insightHtml = safeInsight ? `<div class="insight-note">${safeInsight}</div>` : "";
       const reminderClass = client.status === "at_risk" ? "btn-reminder btn-reminder-risk" : "btn-reminder";
       const rowClass = riskRowClass(client);
 
@@ -625,7 +627,7 @@
         <tr class="${rowClass}">
           <td>
             <div>${safeName}</div>
-            <div class="insight-note">${safeInsight}</div>
+            ${insightHtml}
           </td>
           <td>${safeGoal}</td>
           <td>
