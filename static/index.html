@@ -209,12 +209,20 @@
       background: #f8faff;
     }
 
-    tbody tr.at-risk-row td {
-      background: #fef2f2;
+    tbody tr.risk-high td {
+      background: #fee2e2;
     }
 
-    tbody tr.at-risk-row:hover td {
-      background: #fee2e2;
+    tbody tr.risk-high:hover td {
+      background: #fecaca;
+    }
+
+    tbody tr.risk-medium td {
+      background: #fef9c3;
+    }
+
+    tbody tr.risk-medium:hover td {
+      background: #fef08a;
     }
 
     .badge {
@@ -238,6 +246,16 @@
       background: var(--danger-soft);
     }
 
+    .badge-risk-high {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    .badge-risk-medium {
+      color: #854d0e;
+      background: #fef9c3;
+    }
+
     .actions {
       display: flex;
       gap: 8px;
@@ -249,6 +267,10 @@
       font-size: 0.82rem;
       font-weight: 600;
       margin-top: 6px;
+    }
+
+    .risk-note-medium {
+      color: #854d0e;
     }
 
     .insight-note {
@@ -550,8 +572,14 @@
       return Number(userId);
     }
 
-    function statusBadge(status) {
+    function statusBadge(status, riskLevel) {
       if (status === "at_risk") {
+        if (riskLevel === "high") {
+          return '<span class="badge badge-risk-high">🔴 High Risk</span>';
+        }
+        if (riskLevel === "medium") {
+          return '<span class="badge badge-risk-medium">🟡 Medium Risk</span>';
+        }
         return '<span class="badge badge-risk">at_risk</span>';
       }
       return '<span class="badge badge-active">active</span>';
@@ -563,7 +591,15 @@
 
     function riskNote(client) {
       if (client.status !== "at_risk") return "";
-      return `<div class="risk-note">⚠️ Inactive for ${client.inactive_days} days</div>`;
+      const noteClass = client.risk_level === "medium" ? "risk-note risk-note-medium" : "risk-note";
+      return `<div class="${noteClass}">⚠️ Inactive for ${client.inactive_days} days</div>`;
+    }
+
+    function riskRowClass(client) {
+      if (client.status !== "at_risk") return "";
+      if (client.risk_level === "high") return "risk-high";
+      if (client.risk_level === "medium") return "risk-medium";
+      return "";
     }
 
     function escapeHtml(value = "") {
@@ -583,9 +619,10 @@
       const safeGoal = escapeHtml(client.goal || "");
       const safeNotes = escapeHtml(client.notes || "");
       const reminderClass = client.status === "at_risk" ? "btn-reminder btn-reminder-risk" : "btn-reminder";
+      const rowClass = riskRowClass(client);
 
       return `
-        <tr class="${client.status === "at_risk" ? "at-risk-row" : ""}">
+        <tr class="${rowClass}">
           <td>
             <div>${safeName}</div>
             <div class="insight-note">${safeInsight}</div>
@@ -603,7 +640,7 @@
           </td>
           <td>${client.streak}</td>
           <td>
-            ${statusBadge(client.status)}
+            ${statusBadge(client.status, client.risk_level)}
             ${riskNote(client)}
           </td>
           <td>
