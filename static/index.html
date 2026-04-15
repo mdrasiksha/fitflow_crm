@@ -6,9 +6,9 @@
   <title>FitFlow Dashboard</title>
   <style>
     :root {
-      --bg: #f3f7ff;
+      --bg: #ffffff;
       --surface: #ffffff;
-      --surface-soft: #f8fbff;
+      --surface-soft: #f8fafc;
       --text: #0f172a;
       --muted: #64748b;
       --border: #e2e8f0;
@@ -16,11 +16,13 @@
       --primary-dark: #1d4ed8;
       --success: #16a34a;
       --danger: #dc2626;
+      --neutral: #64748b;
       --success-soft: #dcfce7;
       --danger-soft: #fee2e2;
-      --radius: 16px;
-      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
-      --shadow-md: 0 12px 34px rgba(37, 99, 235, 0.12);
+      --neutral-soft: #e2e8f0;
+      --radius: 12px;
+      --shadow-sm: 0 2px 10px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 10px 28px rgba(15, 23, 42, 0.08);
     }
 
     * {
@@ -32,7 +34,7 @@
       min-height: 100vh;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       color: var(--text);
-      background: linear-gradient(180deg, #ebf2ff 0%, var(--bg) 34%);
+      background: var(--bg);
       padding: 28px 18px;
     }
 
@@ -44,11 +46,11 @@
     }
 
     .header {
-      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 45%, #3b82f6 100%);
-      color: #fff;
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: var(--shadow-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 22px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -58,14 +60,14 @@
 
     .header h1 {
       margin: 0;
-      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-size: clamp(1.35rem, 2.4vw, 1.9rem);
       letter-spacing: -0.01em;
     }
 
     .subtitle {
       margin: 8px 0 0;
-      color: rgba(255, 255, 255, 0.86);
-      font-size: 0.98rem;
+      color: var(--muted);
+      font-size: 0.96rem;
     }
 
     .card {
@@ -74,6 +76,50 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow-sm);
       padding: 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 18px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-label {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      margin: 6px 0 0;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .stat-value.danger {
+      color: var(--danger);
+    }
+
+    .stat-value.success {
+      color: var(--success);
     }
 
     .section-head {
@@ -97,14 +143,17 @@
 
     .btn {
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       padding: 10px 14px;
       font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.2s ease;
-      transition-property: background-color, box-shadow, transform, opacity;
-      box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12);
+      transition: background-color 0.22s ease, box-shadow 0.22s ease, transform 0.18s ease, opacity 0.18s ease;
+      box-shadow: 0 1px 2px rgba(2, 6, 23, 0.1);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
     }
 
     .btn:active {
@@ -112,12 +161,12 @@
     }
 
     .btn-primary {
-      background: #fff;
+      background: #eff6ff;
       color: var(--primary);
     }
 
     .btn-primary:hover {
-      background: #eff6ff;
+      background: #dbeafe;
     }
 
     .btn-submit {
@@ -169,60 +218,74 @@
       background: #b91c1c;
     }
 
-    .table-wrap {
-      overflow-x: auto;
+    .client-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .client-item {
       border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface-soft);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      min-width: 720px;
-    }
-
-    th,
-    td {
-      padding: 14px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
+      border-radius: var(--radius);
       background: #fff;
+      padding: 16px;
+      transition: box-shadow 0.24s ease, transform 0.24s ease, border-color 0.24s ease;
+      display: grid;
+      gap: 14px;
     }
 
-    th {
-      font-size: 0.78rem;
+    .client-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: #cbd5e1;
+    }
+
+    .client-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .client-name {
+      margin: 0;
+      font-size: 1.02rem;
+      font-weight: 700;
+    }
+
+    .insight-note {
+      color: #475569;
+      font-size: 0.88rem;
+      margin-top: 5px;
+      line-height: 1.45;
+    }
+
+    .client-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .meta-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .meta-label {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.76rem;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: var(--muted);
       font-weight: 700;
-      background: var(--surface-soft);
     }
 
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    tbody tr:hover td {
-      background: #f8faff;
-    }
-
-    tbody tr.risk-high td {
-      background: #fee2e2;
-    }
-
-    tbody tr.risk-high:hover td {
-      background: #fecaca;
-    }
-
-    tbody tr.risk-medium td {
-      background: #fef9c3;
-    }
-
-    tbody tr.risk-medium:hover td {
-      background: #fef08a;
+    .meta-value {
+      margin: 4px 0 0;
+      font-size: 0.92rem;
+      font-weight: 600;
     }
 
     .badge {
@@ -230,10 +293,11 @@
       padding: 4px 10px;
       font-size: 0.78rem;
       font-weight: 700;
-      text-transform: lowercase;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      text-transform: capitalize;
+      white-space: nowrap;
     }
 
     .badge-active {
@@ -246,20 +310,9 @@
       background: var(--danger-soft);
     }
 
-    .badge-risk-high {
-      color: #991b1b;
-      background: #fee2e2;
-    }
-
-    .badge-risk-medium {
-      color: #854d0e;
-      background: #fef9c3;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+    .badge-neutral {
+      color: #334155;
+      background: var(--neutral-soft);
     }
 
     .risk-note {
@@ -273,11 +326,46 @@
       color: #854d0e;
     }
 
-    .insight-note {
-      color: #6b7280;
+    .client-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .editor-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .editor-panel {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .editor-title {
+      margin: 0;
+      color: var(--muted);
       font-size: 0.78rem;
-      margin-top: 3px;
-      line-height: 1.35;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    .editor-inline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .editor-inline input {
+      flex: 1;
+      min-width: 160px;
     }
 
     .empty-state {
@@ -285,6 +373,9 @@
       color: var(--muted);
       padding: 26px 12px;
       font-weight: 500;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-soft);
     }
 
     .client-form,
@@ -317,7 +408,7 @@
       width: 100%;
       padding: 11px 12px;
       border: 1px solid var(--border);
-      border-radius: 11px;
+      border-radius: 10px;
       font-size: 0.95rem;
       color: var(--text);
       outline: none;
@@ -331,7 +422,7 @@
 
     input:focus {
       border-color: #93c5fd;
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
     }
 
     .inline-feedback {
@@ -407,12 +498,11 @@
 
     @media (max-width: 900px) {
       .client-form,
-      .auth-form {
+      .auth-form,
+      .stats-grid,
+      .client-meta,
+      .editor-row {
         grid-template-columns: 1fr;
-      }
-
-      .header {
-        padding: 22px;
       }
 
       .toast {
@@ -436,6 +526,21 @@
         <p class="subtitle">Track clients and prevent drop-offs</p>
       </div>
       <button class="btn btn-primary" id="refreshBtn" type="button">Refresh</button>
+    </section>
+
+    <section class="stats-grid" aria-label="Client summary metrics">
+      <article class="stat-card">
+        <p class="stat-label">At-risk clients</p>
+        <p class="stat-value danger" id="atRiskCount">0</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Active clients</p>
+        <p class="stat-value success" id="activeCount">0</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Total clients</p>
+        <p class="stat-value" id="totalCount">0</p>
+      </article>
     </section>
 
     <section class="card">
@@ -464,22 +569,7 @@
         <span class="subtle" id="tableMessage" aria-live="polite"></span>
       </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Goal</th>
-              <th>Notes</th>
-              <th>Weight</th>
-              <th>Streak</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="clientRows"></tbody>
-        </table>
-      </div>
+      <div class="client-list" id="clientRows"></div>
     </section>
 
     <section class="card">
@@ -527,6 +617,9 @@
     const authStatus = document.getElementById("authStatus");
     const toast = document.getElementById("toast");
     const loading = document.getElementById("loading");
+    const atRiskCount = document.getElementById("atRiskCount");
+    const activeCount = document.getElementById("activeCount");
+    const totalCount = document.getElementById("totalCount");
     let progressChart;
 
     let toastTimeout;
@@ -573,34 +666,32 @@
       return Number(userId);
     }
 
-    function statusBadge(status, riskLevel) {
+    function updateSummaryCards(clients = []) {
+      const atRisk = clients.filter((client) => client.status === "at_risk").length;
+      const active = clients.filter((client) => client.status === "active").length;
+      atRiskCount.textContent = String(atRisk);
+      activeCount.textContent = String(active);
+      totalCount.textContent = String(clients.length);
+    }
+
+    function statusBadge(status) {
       if (status === "at_risk") {
-        if (riskLevel === "high") {
-          return '<span class="badge badge-risk-high">🔴 High Risk</span>';
-        }
-        if (riskLevel === "medium") {
-          return '<span class="badge badge-risk-medium">🟡 Medium Risk</span>';
-        }
-        return '<span class="badge badge-risk">at_risk</span>';
+        return '<span class="badge badge-risk">At-risk</span>';
       }
-      return '<span class="badge badge-active">active</span>';
+      if (status === "active") {
+        return '<span class="badge badge-active">Active</span>';
+      }
+      return '<span class="badge badge-neutral">Neutral</span>';
     }
 
     function emptyStateRow() {
-      return '<tr><td colspan="7" class="empty-state">No clients yet</td></tr>';
+      return '<div class="empty-state">No clients yet</div>';
     }
 
     function riskNote(client) {
       if (client.status !== "at_risk") return "";
       const noteClass = client.risk_level === "medium" ? "risk-note risk-note-medium" : "risk-note";
       return `<div class="${noteClass}">⚠️ Inactive for ${client.inactive_days} days</div>`;
-    }
-
-    function riskRowClass(client) {
-      if (client.status !== "at_risk") return "";
-      if (client.risk_level === "high") return "risk-high";
-      if (client.risk_level === "medium") return "risk-medium";
-      return "";
     }
 
     function escapeHtml(value = "") {
@@ -614,46 +705,66 @@
 
     function rowTemplate(client) {
       const latestWeight = client.latest_weight == null ? "—" : `${client.latest_weight} kg`;
-      const previousWeight = client.previous_weight == null ? "" : `<div class="subtle">Prev: ${client.previous_weight} kg</div>`;
+      const previousWeight = client.previous_weight == null ? "—" : `${client.previous_weight} kg`;
       const safeName = escapeHtml(client.name || "");
-      const safeInsight = escapeHtml(client.insight || "");
-      const safeGoal = escapeHtml(client.goal || "");
+      const safeInsight = escapeHtml(client.insight || "No insight yet. Check in to collect more context.");
+      const safeGoal = escapeHtml(client.goal || "Not set");
       const safeNotes = escapeHtml(client.notes || "");
-      const insightHtml = safeInsight ? `<div class="insight-note">${safeInsight}</div>` : "";
       const reminderClass = client.status === "at_risk" ? "btn-reminder btn-reminder-risk" : "btn-reminder";
-      const rowClass = riskRowClass(client);
 
       return `
-        <tr class="${rowClass}">
-          <td>
-            <div>${safeName}</div>
-            ${insightHtml}
-          </td>
-          <td>${safeGoal}</td>
-          <td>
-            <input type="text" id="note-${client.id}" placeholder="Add notes" value="${safeNotes}" />
-            <button class="btn btn-submit" data-id="${client.id}" data-action="save-notes" type="button" style="margin-top:8px;">Save Notes</button>
-          </td>
-          <td>
-            <div>${latestWeight}</div>
-            ${previousWeight}
-            <input type="number" step="0.1" id="weight-${client.id}" placeholder="Enter weight" style="margin-top:8px;" />
-            <button class="btn btn-submit" data-id="${client.id}" data-action="update-weight" type="button" style="margin-top:8px;">Update Weight</button>
-          </td>
-          <td>${client.streak}</td>
-          <td>
-            ${statusBadge(client.status, client.risk_level)}
-            ${riskNote(client)}
-          </td>
-          <td>
-            <div class="actions">
-              <button class="btn btn-yes" data-id="${client.id}" data-status="yes" type="button">YES</button>
-              <button class="btn btn-no" data-id="${client.id}" data-status="no" type="button">NO</button>
-              <button class="btn btn-primary" data-id="${client.id}" data-action="view-progress" type="button">View Progress</button>
-              <button class="btn ${reminderClass}" data-id="${client.id}" data-action="reminder" type="button">Send Reminder</button>
+        <article class="client-item">
+          <div class="client-top">
+            <div>
+              <h3 class="client-name">${safeName}</h3>
+              <div class="insight-note">${safeInsight}</div>
             </div>
-          </td>
-        </tr>
+            <div>
+              ${statusBadge(client.status)}
+              ${riskNote(client)}
+            </div>
+          </div>
+
+          <div class="client-meta">
+            <div class="meta-box">
+              <p class="meta-label">Goal</p>
+              <p class="meta-value">${safeGoal}</p>
+            </div>
+            <div class="meta-box">
+              <p class="meta-label">Streak</p>
+              <p class="meta-value">${client.streak}</p>
+            </div>
+            <div class="meta-box">
+              <p class="meta-label">Weight</p>
+              <p class="meta-value">${latestWeight} <span class="subtle">(prev ${previousWeight})</span></p>
+            </div>
+          </div>
+
+          <div class="client-actions">
+            <button class="btn btn-yes" data-id="${client.id}" data-status="yes" type="button">YES</button>
+            <button class="btn btn-no" data-id="${client.id}" data-status="no" type="button">NO</button>
+            <button class="btn btn-primary" data-id="${client.id}" data-action="view-progress" type="button">View Progress</button>
+            <button class="btn ${reminderClass}" data-id="${client.id}" data-action="reminder" type="button">Send Reminder</button>
+          </div>
+
+          <div class="editor-row">
+            <div class="editor-panel">
+              <p class="editor-title">Notes</p>
+              <div class="editor-inline">
+                <input type="text" id="note-${client.id}" placeholder="Add notes" value="${safeNotes}" />
+                <button class="btn btn-submit" data-id="${client.id}" data-action="save-notes" type="button">Save</button>
+              </div>
+            </div>
+
+            <div class="editor-panel">
+              <p class="editor-title">Weight Update</p>
+              <div class="editor-inline">
+                <input type="number" step="0.1" id="weight-${client.id}" placeholder="Enter weight" />
+                <button class="btn btn-submit" data-id="${client.id}" data-action="update-weight" type="button">Update</button>
+              </div>
+            </div>
+          </div>
+        </article>
       `;
     }
 
@@ -771,6 +882,7 @@
         if (!userId) {
           clientRows.innerHTML = emptyStateRow();
           tableMessage.textContent = "Login to view your clients";
+          updateSummaryCards([]);
           return;
         }
         const response = await fetch(API + "/dashboard?user_id=" + userId);
@@ -781,6 +893,7 @@
         }
 
         const clients = payload.data || [];
+        updateSummaryCards(clients);
 
         if (clients.length === 0) {
           clientRows.innerHTML = emptyStateRow();
@@ -794,6 +907,7 @@
         console.error("loadClients failed:", error);
         clientRows.innerHTML = emptyStateRow();
         tableMessage.textContent = "Failed to load clients";
+        updateSummaryCards([]);
         showToast("Failed to load clients", "error");
       } finally {
         hideLoading();
@@ -1028,6 +1142,7 @@
     } else {
       clientRows.innerHTML = emptyStateRow();
       tableMessage.textContent = "Login to view your clients";
+      updateSummaryCards([]);
       hideLoading();
     }
   </script>
