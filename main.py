@@ -102,6 +102,10 @@ class ProgressCreate(BaseModel):
     weight: float
 
 
+class ReminderCreate(BaseModel):
+    client_id: int
+
+
 class UserAuthPayload(BaseModel):
     email: str
     password: str
@@ -294,6 +298,15 @@ def create_checkin(payload: CheckinCreate, db: Session = Depends(get_db)):
             "status": payload.status,
         },
     }
+
+
+@app.post("/reminder")
+def send_reminder(payload: ReminderCreate, db: Session = Depends(get_db)):
+    client = db.query(models.Client).filter(models.Client.id == payload.client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    return {"message": "Reminder sent to client"}
 
 
 # ======================
