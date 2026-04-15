@@ -114,6 +114,14 @@ def is_at_risk(inactive_days: int) -> bool:
     return inactive_days >= 2
 
 
+def get_risk_level(inactive_days: int) -> Literal["high", "medium", "low"]:
+    if inactive_days >= 3:
+        return "high"
+    if inactive_days == 2:
+        return "medium"
+    return "low"
+
+
 def calculate_inactive_days(client: models.Client) -> int:
     checkins = sorted(client.checkins, key=lambda c: c.date, reverse=True)
     if checkins:
@@ -127,6 +135,7 @@ def calculate_inactive_days(client: models.Client) -> int:
 def dashboard_row(client: models.Client) -> dict:
     inactive_days = calculate_inactive_days(client)
     at_risk = is_at_risk(inactive_days)
+    risk_level = get_risk_level(inactive_days)
     streak = calculate_streak(client)
     sorted_progress = sorted(client.progress_entries, key=lambda p: (p.date, p.id), reverse=True)
     latest_weight = sorted_progress[0].weight if sorted_progress else None
@@ -150,6 +159,7 @@ def dashboard_row(client: models.Client) -> dict:
         "streak": streak,
         "status": "at_risk" if at_risk else "active",
         "inactive_days": inactive_days,
+        "risk_level": risk_level,
         "insight": insight,
     }
 
