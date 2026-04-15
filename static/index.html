@@ -520,7 +520,7 @@
       <section class="topbar">
         <div class="topbar-left">
           <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle sidebar">☰</button>
-          <input class="search" id="search" type="search" placeholder="Search clients..." aria-label="Search clients" />
+          <input class="search" type="search" placeholder="Search clients, goals, notes..." aria-label="Search" />
           <button class="btn btn-primary" id="refreshBtn" type="button">Refresh</button>
         </div>
         <div class="profile-chip" title="Current user">
@@ -558,9 +558,9 @@
         </article>
       </section>
 
-      <section class="card" id="authCard">
+      <section class="card">
         <div class="section-head" style="margin-bottom:16px;">
-          <h2>Login & Signup</h2>
+          <h2>Login</h2>
         </div>
         <form id="loginForm" class="auth-form">
           <div class="field">
@@ -572,30 +572,11 @@
             <input id="authPassword" name="password" type="password" placeholder="1234" required />
           </div>
           <button class="btn btn-submit" id="loginBtn" type="submit">Login</button>
-        </form>
-        <form id="signupForm" class="auth-form" style="margin-top: 14px;">
-          <div class="field">
-            <label for="signupName">Name</label>
-            <input id="signupName" name="name" type="text" placeholder="John Doe" required />
-          </div>
-          <div class="field">
-            <label for="signupPhone">Phone</label>
-            <input id="signupPhone" name="phone" type="tel" placeholder="1234567890" required />
-          </div>
-          <div class="field">
-            <label for="signupEmail">Email</label>
-            <input id="signupEmail" name="email" type="email" placeholder="john@gmail.com" required />
-          </div>
-          <div class="field">
-            <label for="signupPassword">Password</label>
-            <input id="signupPassword" name="password" type="password" placeholder="••••••••" required />
-          </div>
-          <button class="btn btn-primary" id="registerBtn" type="submit">Create Account</button>
+          <button class="btn btn-primary" id="registerBtn" type="button">Register</button>
         </form>
         <div class="inline-feedback" id="authMessage" aria-live="polite"></div>
       </section>
 
-      <div id="dashboardSections">
       <section class="card">
         <div class="section-head">
           <h2>Clients</h2>
@@ -625,7 +606,6 @@
         </form>
         <div class="inline-feedback" id="formMessage" aria-live="polite"></div>
       </section>
-      </div>
     </main>
   </div>
 
@@ -639,26 +619,20 @@
     const sidebar = document.getElementById("sidebar");
     const menuToggle = document.getElementById("menuToggle");
     const clientRows = document.getElementById("clientRows");
-    const searchInput = document.getElementById("search");
     const refreshBtn = document.getElementById("refreshBtn");
     const tableMessage = document.getElementById("tableMessage");
     const formMessage = document.getElementById("formMessage");
     const addClientForm = document.getElementById("addClientForm");
     const loginForm = document.getElementById("loginForm");
-    const signupForm = document.getElementById("signupForm");
     const registerBtn = document.getElementById("registerBtn");
-    const loginBtn = document.getElementById("loginBtn");
     const authMessage = document.getElementById("authMessage");
     const authStatus = document.getElementById("authStatus");
-    const authCard = document.getElementById("authCard");
-    const dashboardSections = document.getElementById("dashboardSections");
     const toast = document.getElementById("toast");
     const loading = document.getElementById("loading");
     const atRiskCount = document.getElementById("atRiskCount");
     const activeCount = document.getElementById("activeCount");
     const totalCount = document.getElementById("totalCount");
     let progressChart;
-    let clients = [];
 
     let toastTimeout;
 
@@ -716,20 +690,6 @@
       atRiskCount.textContent = String(atRisk);
       activeCount.textContent = String(active);
       totalCount.textContent = String(clients.length);
-    }
-
-    function showLoginScreen() {
-      authCard.style.display = "block";
-      dashboardSections.style.display = "none";
-      tableMessage.textContent = "Login to view your clients";
-      clientRows.innerHTML = emptyStateRow();
-      updateSummaryCards([]);
-    }
-
-    function loadDashboard() {
-      authCard.style.display = "none";
-      dashboardSections.style.display = "block";
-      loadClients();
     }
 
     function statusBadge(status) {
@@ -827,18 +787,6 @@
           </div>
         </article>
       `;
-    }
-
-    function renderClients(list = clients) {
-      if (!Array.isArray(list) || list.length === 0) {
-        clientRows.innerHTML = emptyStateRow();
-        tableMessage.textContent = clients.length
-          ? "No matching clients"
-          : "No clients yet";
-        return;
-      }
-      clientRows.innerHTML = list.map(rowTemplate).join("");
-      tableMessage.textContent = `${list.length} client(s)`;
     }
 
     function getProgressCard() {
@@ -954,21 +902,19 @@
           throw new Error(payload.message || "Could not load dashboard");
         }
 
-        clients = payload.data || [];
+        const clients = payload.data || [];
         updateSummaryCards(clients);
-        const query = (searchInput.value || "").toLowerCase().trim();
-        if (query) {
-          const filtered = clients.filter((c) =>
-            (c.name || "").toLowerCase().includes(query) ||
-            (c.goal || "").toLowerCase().includes(query)
-          );
-          renderClients(filtered);
-        } else {
-          renderClients(clients);
+
+        if (clients.length === 0) {
+          clientRows.innerHTML = emptyStateRow();
+          tableMessage.textContent = "No clients yet";
+          return;
         }
+
+        clientRows.innerHTML = clients.map(rowTemplate).join("");
+        tableMessage.textContent = `${clients.length} client(s)`;
       } catch (error) {
         console.error("loadClients failed:", error);
-        clients = [];
         clientRows.innerHTML = emptyStateRow();
         tableMessage.textContent = "Failed to load clients";
         updateSummaryCards([]);
@@ -1095,44 +1041,31 @@
       }
     }
 
-    async function registerUser(event) {
-      event.preventDefault();
-
-      const name = document.getElementById("signupName").value.trim();
-      const phone = document.getElementById("signupPhone").value.trim();
-      const email = document.getElementById("signupEmail").value.trim();
-      const password = document.getElementById("signupPassword").value.trim();
-      if (!name || !phone || !email || !password) {
-        setAuthFeedback("Please complete all signup fields.", "error");
+    async function registerUser() {
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value.trim();
+      if (!email || !password) {
+        setAuthFeedback("Please fill in email and password.", "error");
         return;
       }
 
-      registerBtn.disabled = true;
-      registerBtn.textContent = "Creating...";
       try {
         const response = await fetch(API + "/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, phone, email, password })
+          body: JSON.stringify({ email, password })
         });
         const payload = await parseJsonResponse(response, "Register response was not valid JSON");
         if (!response.ok) {
-          if (payload.error) {
-            alert(payload.error);
-          }
-          throw new Error(payload.error || payload.message || "Registration failed");
+          throw new Error(payload.message || "Registration failed");
         }
 
-        signupForm.reset();
-        setAuthFeedback("Account created successfully", "success");
-        showToast("Account created successfully", "success");
+        setAuthFeedback(`Registered successfully (user #${payload.user_id}).`, "success");
+        showToast("Registered successfully", "success");
       } catch (error) {
         console.error("registerUser failed:", error);
         setAuthFeedback(error.message || "Could not register user.", "error");
         showToast("Could not register user", "error");
-      } finally {
-        registerBtn.disabled = false;
-        registerBtn.textContent = "Create Account";
       }
     }
 
@@ -1146,8 +1079,6 @@
         return;
       }
 
-      loginBtn.disabled = true;
-      loginBtn.textContent = "Logging in...";
       try {
         const response = await fetch(API + "/login", {
           method: "POST",
@@ -1158,25 +1089,18 @@
         const payload = await parseJsonResponse(response, "Login response was not valid JSON");
 
         if (!response.ok || !payload.user_id) {
-          if (payload.error) {
-            alert(payload.error);
-          }
-          throw new Error(payload.error || payload.message || "Login failed");
+          throw new Error(payload.message || "Login failed");
         }
 
         localStorage.setItem("user_id", String(payload.user_id));
-        loginForm.reset();
         refreshAuthStatus();
         setAuthFeedback("Login successful.", "success");
         showToast("Login successful", "success");
-        loadDashboard();
+        await loadClients();
       } catch (error) {
         console.error("loginUser failed:", error);
         setAuthFeedback(error.message || "Could not login.", "error");
         showToast("Could not login", "error");
-      } finally {
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Login";
       }
     }
 
@@ -1212,25 +1136,22 @@
     refreshBtn.addEventListener("click", loadClients);
     addClientForm.addEventListener("submit", addClient);
     loginForm.addEventListener("submit", loginUser);
-    signupForm.addEventListener("submit", registerUser);
-    searchInput.addEventListener("input", function () {
-      const value = this.value.toLowerCase().trim();
-      const filtered = clients.filter((c) =>
-        (c.name || "").toLowerCase().includes(value) ||
-        (c.goal || "").toLowerCase().includes(value)
-      );
-      renderClients(filtered);
-    });
+    registerBtn.addEventListener("click", registerUser);
     window.onload = function () {
       if (!localStorage.getItem("user_id")) {
-        showLoginScreen();
-      } else {
-        loadDashboard();
+        hideLoading();
       }
-      hideLoading();
     };
 
     refreshAuthStatus();
+    if (localStorage.getItem("user_id")) {
+      loadClients();
+    } else {
+      clientRows.innerHTML = emptyStateRow();
+      tableMessage.textContent = "Login to view your clients";
+      updateSummaryCards([]);
+      hideLoading();
+    }
   </script>
 </body>
 </html>

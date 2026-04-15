@@ -5,7 +5,6 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from passlib.hash import bcrypt
 from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session, joinedload
@@ -40,15 +39,6 @@ def ensure_schema_updates() -> None:
             conn.execute(text("ALTER TABLE clients ADD COLUMN notes VARCHAR"))
         if "user_id" not in column_names:
             conn.execute(text("ALTER TABLE clients ADD COLUMN user_id INTEGER"))
-
-        user_column_names = {
-            row[1]
-            for row in conn.execute(text("PRAGMA table_info(users)")).fetchall()
-        }
-        if "name" not in user_column_names:
-            conn.execute(text("ALTER TABLE users ADD COLUMN name VARCHAR"))
-        if "phone" not in user_column_names:
-            conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR"))
 
 
 ensure_schema_updates()
@@ -113,13 +103,6 @@ class ProgressCreate(BaseModel):
 
 
 class UserAuthPayload(BaseModel):
-    email: str
-    password: str
-
-
-class UserRegisterPayload(BaseModel):
-    name: str
-    phone: str
     email: str
     password: str
 
@@ -255,45 +238,31 @@ def update_client_notes(client_id: int, payload: ClientNotesUpdate, db: Session 
 # Auth APIs
 # ======================
 @app.post("/register")
-def register_user(payload: UserRegisterPayload, db: Session = Depends(get_db)):
-    normalized_email = payload.email.strip().lower()
-    existing_user = db.query(models.User).filter(models.User.email == normalized_email).first()
+def register_user(payload: UserAuthPayload, db: Session = Depends(get_db)):
+    existing_user = db.query(models.User).filter(models.User.email == payload.email).first()
     if existing_user:
-        return JSONResponse(status_code=400, content={"error": "Email already registered"})
+        raise HTTPException(status_code=400, detail="Email already registered")
 
-    user = models.User(
-        name=payload.name.strip(),
-        phone=payload.phone.strip(),
-        email=normalized_email,
-        password=bcrypt.hash(payload.password),
-    )
+    user = models.User(email=payload.email, password=payload.password)
     db.add(user)
     db.commit()
     db.refresh(user)
 
     return {
-        "message": "Account created successfully",
+        "message": "User registered",
         "user_id": user.id,
     }
 
 
 @app.post("/login")
 def login_user(payload: UserAuthPayload, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == payload.email.strip().lower()).first()
+    user = (
+        db.query(models.User)
+        .filter(models.User.email == payload.email, models.User.password == payload.password)
+        .first()
+    )
     if not user:
-        return JSONResponse(status_code=404, content={"error": "Email not found"})
-
-    try:
-        password_valid = bcrypt.verify(payload.password, user.password)
-    except ValueError:
-        # Backward compatibility for legacy plain-text rows.
-        password_valid = payload.password == user.password
-        if password_valid:
-            user.password = bcrypt.hash(payload.password)
-            db.commit()
-
-    if not password_valid:
-        return JSONResponse(status_code=401, content={"error": "Incorrect password"})
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
     return {"user_id": user.id}
 
